@@ -1,0 +1,11 @@
+name = "tradershelf"
+compatibility_date = "2026-11-06"
+account_id = "b97613dd94957e6e13603d4a91a68935"
+
+routes = [
+  { pattern = "tradershelf.com", custom_domain = true }
+]
+
+[assets]
+directory = "public"
+not_found_handling = "404-page"

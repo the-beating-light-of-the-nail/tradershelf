@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Position Size Calculator — Risk-Based Sizing for Stocks, Crypto &amp; Forex | TraderShelf</title>
+  <meta name="description" content="Free position size calculator. Enter account size, risk per trade, entry and stop-loss — get the exact position size that caps your loss. Works for stocks, crypto, and forex. Runs entirely in your browser.">
+  <link rel="canonical" href="https://tradershelf.com/tools/position-size/">
+  <meta name="theme-color" content="#0b0f14">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TraderShelf">
+  <meta property="og:title" content="Position Size Calculator — TraderShelf">
+  <meta property="og:description" content="Size every trade from the risk you're willing to take. Free, instant, and entirely in your browser.">
+  <meta property="og:url" content="https://tradershelf.com/tools/position-size/">
+  <meta property="og:image" content="https://tradershelf.com/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Position Size Calculator — TraderShelf">
+  <meta name="twitter:description" content="Size every trade from the risk you're willing to take. Free, instant, all local.">
+  <meta name="twitter:image" content="https://tradershelf.com/og.png">
+
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Position Size Calculator",
+    "url": "https://tradershelf.com/tools/position-size/",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "Risk-based position size calculator for stocks, crypto, and forex."
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is position sizing in trading?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Position sizing is deciding how large a trade should be before you enter it. Instead of guessing a number of shares or contracts, you start from the amount you're willing to lose if your stop-loss is hit, then work backwards to a position size." }
+      },
+      {
+        "@type": "Question",
+        "name": "What percentage of my account should I risk per trade?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Many traders keep single-trade risk between 0.5% and 2% of their account. There is no universal number — the point of a fixed percentage is that a string of losses stays survivable. Ten consecutive 1% losses draw the account down about 9.6%, not 10%." }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this calculator work for crypto and forex?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. The math is unit-agnostic: enter prices in the quote currency of your market and your account size in the same currency. The result is a position size in base units — BTC, lots of EUR, shares, or contracts alike." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is my data uploaded anywhere?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. The calculator is plain JavaScript running in your browser. Nothing you type is sent to a server, logged, or stored." }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container inner">
+      <a class="logo" href="/" aria-label="TraderShelf home">
+        <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="14" fill="#10161e" stroke="#1f2a36"/>
+          <rect x="14" y="12" width="7" height="18" rx="1.5" fill="#2dd4bf"/>
+          <rect x="23" y="15" width="7" height="15" rx="1.5" fill="#e7edf3" opacity=".85"/>
+          <rect x="32" y="10" width="7" height="20" rx="1.5" fill="#fbbf24"/>
+          <rect x="12" y="30" width="40" height="3" rx="1.5" fill="#8b98a8"/>
+          <rect x="26" y="40" width="4" height="10" fill="#34d399"/>
+          <rect x="21" y="44" width="14" height="3" fill="#34d399"/>
+          <rect x="42" y="37" width="4" height="9" fill="#f87171"/>
+          <rect x="38" y="40" width="12" height="3" fill="#f87171"/>
+        </svg>
+        TraderShelf
+      </a>
+      <nav class="nav-links">
+        <a href="/tools/position-size/" class="active">Position&nbsp;Size</a>
+        <a href="/tools/risk-reward/">Risk:Reward</a>
+        <a href="https://calm.tradershelf.com/" class="keep" target="_blank" rel="noopener">Calm&nbsp;Breaks&nbsp;↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="tool-head container">
+      <p class="breadcrumbs"><a href="/">TraderShelf</a> / <a href="/#tools">Tools</a> / Position Size</p>
+      <h1>Position Size Calculator</h1>
+      <p class="lede">Tell it your account size, the slice you'd risk, and your entry and stop. It returns the position size that keeps a stopped-out trade equal to that slice — long or short, detected automatically.</p>
+    </div>
+
+    <div class="tool-layout container">
+      <section class="panel" aria-label="Inputs">
+        <h2>Your trade</h2>
+        <div class="field">
+          <label for="f-equity">Account size <span class="hint">in your currency</span></label>
+          <input id="f-equity" type="text" inputmode="decimal" value="10000" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="f-risk">Risk per trade <span class="hint">% of account</span></label>
+          <input id="f-risk" type="text" inputmode="decimal" value="1" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-entry">Entry price</label>
+            <input id="f-entry" type="text" inputmode="decimal" value="50" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="f-stop">Stop-loss price</label>
+            <input id="f-stop" type="text" inputmode="decimal" value="48" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+        <p class="form-error" id="err" role="alert"></p>
+        <p class="formula-note">Formula: <code>qty = (equity × risk%) ÷ |entry − stop|</code>. All math runs in your browser.</p>
+      </section>
+
+      <section class="panel" aria-label="Results">
+        <h2>Sizing</h2>
+        <div class="result-grid">
+          <div class="result-main">
+            <div class="k">Position size <span id="dir-badge" style="margin-left:8px"></span></div>
+            <div class="v" id="r-qty">—</div>
+          </div>
+          <div class="result-rows">
+            <div class="result-row"><span class="k">Amount at risk</span><span class="v" id="r-riskamt">—</span></div>
+            <div class="result-row"><span class="k">Position value</span><span class="v" id="r-value">—</span></div>
+            <div class="result-row"><span class="k">Risk per unit</span><span class="v" id="r-perunit">—</span></div>
+            <div class="result-row"><span class="k">Stop distance</span><span class="v" id="r-dist">—</span></div>
+          </div>
+          <p class="formula-note">If the stop is hit, the loss lands on <span class="inline-code" id="r-note-loss">—</span> regardless of how big the position is. That is the whole point.</p>
+        </div>
+      </section>
+    </div>
+
+    <article class="explainer container">
+      <h2>How the math works</h2>
+      <p>Position sizing starts from the loss, not the position. First fix the amount you'd accept losing on this trade — say 1% of a $10,000 account, or <strong>$100</strong>. Then divide that amount by the distance between your entry and your stop. If you enter at 50 with a stop at 48, each unit risks 2, so you can hold 50 units. A stop-out then costs exactly 50 × 2 = $100.</p>
+      <p>The direction is inferred from your prices: an entry above the stop means you're long (a stop protects the downside); an entry below it means you're short (a stop protects the upside). The formula is identical either way, because only the absolute distance matters.</p>
+      <ul>
+        <li><strong>Works for any market</strong> — shares, crypto, futures, forex. Prices just need to share one currency.</li>
+        <li><strong>Fractional sizes are fine</strong> — 0.034 BTC is a valid answer. Round down if your broker can't do fractions.</li>
+        <li><strong>Slippage isn't included</strong> — real fills can overshoot the stop. Many traders size slightly under the formula for that reason.</li>
+      </ul>
+
+      <h2>Common questions</h2>
+      <div class="faq">
+        <details>
+          <summary>What is position sizing in trading?</summary>
+          <p>It's deciding how large a trade should be before entry. Instead of guessing a number of shares or contracts, you start from the amount you're willing to lose if the stop is hit, then work backwards to a size. This calculator does that working-backwards for you.</p>
+        </details>
+        <details>
+          <summary>What percentage of my account should I risk per trade?</summary>
+          <p>Many traders keep single-trade risk between 0.5% and 2%. There's no universal number — the purpose of a fixed percentage is that a losing streak stays survivable. Ten straight 1% losses draw the account down about 9.6%, not 10%, because each loss is a percentage of a smaller account.</p>
+        </details>
+        <details>
+          <summary>Does this work for crypto and forex?</summary>
+          <p>Yes. The math is unit-agnostic: enter prices in your market's quote currency and your account size in the same currency. The result is a size in base units — BTC, shares, contracts, or lots alike.</p>
+        </details>
+        <details>
+          <summary>Is my data uploaded anywhere?</summary>
+          <p>No. This page is plain JavaScript running in your browser. Nothing you type is sent to a server, logged, or stored.</p>
+        </details>
+      </div>
+
+      <h2>Related on the shelf</h2>
+      <p>Pair sizing with the <a href="/tools/risk-reward/">Risk:Reward Calculator</a> to check what the trade pays if it works, or take a <a href="https://calm.tradershelf.com/" target="_blank" rel="noopener">calm break</a> when the tape gets noisy.</p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container inner">
+      <div>© 2026 TraderShelf</div>
+      <nav>
+        <a href="/tools/position-size/">Position Size</a>
+        <a href="/tools/risk-reward/">Risk:Reward</a>
+        <a href="https://calm.tradershelf.com/" target="_blank" rel="noopener">Calm Breaks</a>
+      </nav>
+      <p class="footer-note">Trading involves substantial risk of loss. Nothing on this site is financial advice. All calculations run locally in your browser.</p>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    var fields = [$('f-equity'), $('f-risk'), $('f-entry'), $('f-stop')];
+    var err = $('err');
+
+    function trimZeros(s) {
+      return s.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+    }
+    function fmtNum(v) {
+      if (!isFinite(v)) return '—';
+      var a = Math.abs(v);
+      if (a === 0) return '0';
+      if (a >= 1000) return v.toLocaleString('en-US', { maximumFractionDigits: 2 });
+      if (a >= 1) return trimZeros(v.toFixed(4));
+      return trimZeros(v.toPrecision(6));
+    }
+    function fmtUSD(v) { return '$' + fmtNum(v); }
+    function showErr(msg) {
+      err.textContent = msg;
+      err.classList.add('show');
+      ['r-qty','r-riskamt','r-value','r-perunit','r-dist','r-note-loss'].forEach(function (id) { $(id).textContent = '—'; });
+      $('dir-badge').innerHTML = '';
+    }
+    function parse(input) {
+      var v = parseFloat(String(input.value).replace(/,/g, '').trim());
+      return isNaN(v) ? NaN : v;
+    }
+
+    function recalc() {
+      var equity = parse($('f-equity'));
+      var riskPct = parse($('f-risk'));
+      var entry = parse($('f-entry'));
+      var stop = parse($('f-stop'));
+
+      fields.forEach(function (f) { f.classList.remove('bad'); });
+      err.classList.remove('show');
+
+      if (!(equity > 0)) { $('f-equity').classList.add('bad'); return showErr('Account size must be a positive number.'); }
+      if (!(riskPct > 0) || riskPct > 100) { $('f-risk').classList.add('bad'); return showErr('Risk per trade must be between 0 and 100 percent.'); }
+      if (!(entry > 0)) { $('f-entry').classList.add('bad'); return showErr('Entry price must be a positive number.'); }
+      if (!(stop > 0)) { $('f-stop').classList.add('bad'); return showErr('Stop-loss price must be a positive number.'); }
+      if (entry === stop) { $('f-entry').classList.add('bad'); $('f-stop').classList.add('bad'); return showErr('Entry and stop can\u2019t be the same price — the risk per unit would be zero.'); }
+
+      var isLong = entry > stop;
+      var riskAmt = equity * riskPct / 100;
+      var perUnit = Math.abs(entry - stop);
+      var qty = riskAmt / perUnit;
+      var value = qty * entry;
+
+      $('dir-badge').innerHTML =
+        '<span class="badge ' + (isLong ? 'long' : 'short') + '">' + (isLong ? 'LONG' : 'SHORT') + '</span>';
+      $('r-qty').textContent = fmtNum(qty) + ' units';
+      $('r-riskamt').textContent = fmtUSD(riskAmt);
+      $('r-value').textContent = fmtUSD(value);
+      $('r-perunit').textContent = fmtUSD(perUnit);
+      $('r-dist').textContent = fmtNum(perUnit) + ' (' + (perUnit / entry * 100).toFixed(2) + '% from entry)';
+      $('r-note-loss').textContent = fmtUSD(riskAmt);
+    }
+
+    fields.forEach(function (f) { f.addEventListener('input', recalc); });
+    recalc();
+  })();
+  </script>
+</body>
+</html>

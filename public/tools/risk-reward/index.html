@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Risk:Reward Calculator — Break-Even Win Rate Included | TraderShelf</title>
+  <meta name="description" content="Free risk:reward calculator. Enter entry, stop-loss and target to get the R:R ratio and the win rate you need just to break even. Works for any market, runs entirely in your browser.">
+  <link rel="canonical" href="https://tradershelf.com/tools/risk-reward/">
+  <meta name="theme-color" content="#0b0f14">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TraderShelf">
+  <meta property="og:title" content="Risk:Reward Calculator — TraderShelf">
+  <meta property="og:description" content="See what a trade pays before you take it — R:R ratio plus the break-even win rate. Free, instant, entirely in your browser.">
+  <meta property="og:url" content="https://tradershelf.com/tools/risk-reward/">
+  <meta property="og:image" content="https://tradershelf.com/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Risk:Reward Calculator — TraderShelf">
+  <meta name="twitter:description" content="See what a trade pays before you take it — R:R ratio plus the break-even win rate. Free, all local.">
+  <meta name="twitter:image" content="https://tradershelf.com/og.png">
+
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Risk:Reward Calculator",
+    "url": "https://tradershelf.com/tools/risk-reward/",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "Risk:reward ratio and break-even win rate calculator for traders."
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a good risk:reward ratio?",
+        "acceptedAnswer": { "@type": "Answer", "text": "There is no magic number, but many traders look for at least 1:2, meaning the target pays twice the distance to the stop. Lower ratios can still be profitable — they just demand a higher win rate, which the break-even figure in this calculator makes explicit." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the break-even win rate?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The win rate at which a strategy makes exactly zero, ignoring fees. It equals 1 ÷ (1 + R). At 1:2, you break even winning 33.3% of trades; at 1:1 you need 50%; at 1:3 only 25%." }
+      },
+      {
+        "@type": "Question",
+        "name": "What does 1R mean?",
+        "acceptedAnswer": { "@type": "Answer", "text": "1R is the amount you risk on a trade — one unit of risk. A +2R winner on a $100 risk makes $200; a -1R loser loses the $100. Quoting results in R keeps sizing, strategy, and account size separate." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is my data uploaded anywhere?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. The calculator is plain JavaScript running in your browser. Nothing you type is sent to a server, logged, or stored." }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container inner">
+      <a class="logo" href="/" aria-label="TraderShelf home">
+        <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="14" fill="#10161e" stroke="#1f2a36"/>
+          <rect x="14" y="12" width="7" height="18" rx="1.5" fill="#2dd4bf"/>
+          <rect x="23" y="15" width="7" height="15" rx="1.5" fill="#e7edf3" opacity=".85"/>
+          <rect x="32" y="10" width="7" height="20" rx="1.5" fill="#fbbf24"/>
+          <rect x="12" y="30" width="40" height="3" rx="1.5" fill="#8b98a8"/>
+          <rect x="26" y="40" width="4" height="10" fill="#34d399"/>
+          <rect x="21" y="44" width="14" height="3" fill="#34d399"/>
+          <rect x="42" y="37" width="4" height="9" fill="#f87171"/>
+          <rect x="38" y="40" width="12" height="3" fill="#f87171"/>
+        </svg>
+        TraderShelf
+      </a>
+      <nav class="nav-links">
+        <a href="/tools/position-size/">Position&nbsp;Size</a>
+        <a href="/tools/risk-reward/" class="active">Risk:Reward</a>
+        <a href="https://calm.tradershelf.com/" class="keep" target="_blank" rel="noopener">Calm&nbsp;Breaks&nbsp;↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="tool-head container">
+      <p class="breadcrumbs"><a href="/">TraderShelf</a> / <a href="/#tools">Tools</a> / Risk:Reward</p>
+      <h1>Risk:Reward Calculator</h1>
+      <p class="lede">Enter your entry, stop, and target. You get the R:R ratio, the win rate you'd need just to break even, and — if you share your account details — what a win and a loss actually cost.</p>
+    </div>
+
+    <div class="tool-layout container">
+      <section class="panel" aria-label="Inputs">
+        <h2>The setup</h2>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-entry">Entry price</label>
+            <input id="f-entry" type="text" inputmode="decimal" value="50" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="f-stop">Stop-loss price</label>
+            <input id="f-stop" type="text" inputmode="decimal" value="48" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-target">Take-profit price</label>
+          <input id="f-target" type="text" inputmode="decimal" value="56" autocomplete="off" spellcheck="false">
+        </div>
+        <h2 style="margin-top:26px">Optional — money view</h2>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-equity">Account size</label>
+            <input id="f-equity" type="text" inputmode="decimal" value="10000" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="f-risk">Risk per trade <span class="hint">%</span></label>
+            <input id="f-risk" type="text" inputmode="decimal" value="1" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+        <p class="form-error" id="err" role="alert"></p>
+        <p class="formula-note">Formula: <code>R:R = |target − entry| ÷ |entry − stop|</code>, break-even win rate <code>= 1 ÷ (1 + R)</code>. All math runs in your browser.</p>
+      </section>
+
+      <section class="panel" aria-label="Results">
+        <h2>The verdict</h2>
+        <div class="result-grid">
+          <div class="result-main">
+            <div class="k">Risk:Reward <span id="dir-badge" style="margin-left:8px"></span></div>
+            <div class="v" id="r-rr">—</div>
+          </div>
+          <div class="result-rows">
+            <div class="result-row"><span class="k">Break-even win rate</span><span class="v" id="r-be">—</span></div>
+            <div class="result-row"><span class="k">Risk distance</span><span class="v" id="r-rdist">—</span></div>
+            <div class="result-row"><span class="k">Reward distance</span><span class="v" id="r-wdist">—</span></div>
+            <div class="result-row"><span class="k">You risk / you target</span><span class="v" id="r-money">—</span></div>
+          </div>
+          <p class="formula-note">Below <span class="inline-code" id="r-note-be">—</span> win rate this setup loses money on average; above it, it pays. Fees push the real bar a little higher.</p>
+        </div>
+      </section>
+    </div>
+
+    <article class="explainer container">
+      <h2>How to read it</h2>
+      <p>The ratio compares the distance from entry to target against the distance from entry to stop. A 1:2 setup risks one unit to make two. Direction is inferred from your prices: target above entry with stop below means long; the reverse means short. The math is identical either way.</p>
+      <p>The <strong>break-even win rate</strong> is the quiet hero of the number. It's the share of trades you must win to end up at exactly zero, ignoring fees: <span class="inline-code">1 ÷ (1 + R)</span>. At 1:2 you only need to be right a third of the time; at 1:1 you need half; at 2:1 — risking twice what you target — you need to be right two times out of three, which is a very different game.</p>
+      <ul>
+        <li><strong>Lower R:R isn't automatically worse</strong> — tight-target strategies with high hit rates can be profitable. The break-even number tells you which game you're playing.</li>
+        <li><strong>Fees aren't included</strong> — commissions and spread raise the effective bar. Give yourself a cushion.</li>
+        <li><strong>Targets are guesses, stops are orders</strong> — the stop is the one price here you can enforce mechanically.</li>
+      </ul>
+
+      <h2>Common questions</h2>
+      <div class="faq">
+        <details>
+          <summary>What is a good risk:reward ratio?</summary>
+          <p>There's no magic number, but many traders look for at least 1:2. Lower ratios can still be profitable — they just demand a higher win rate, which the break-even figure above makes explicit. Judge the ratio and your realistic hit rate together, not separately.</p>
+        </details>
+        <details>
+          <summary>What is the break-even win rate?</summary>
+          <p>The win rate at which a strategy makes exactly zero, ignoring fees. It equals 1 ÷ (1 + R). At 1:2 you break even winning 33.3% of trades; at 1:1 you need 50%; at 1:3 only 25%.</p>
+        </details>
+        <details>
+          <summary>What does 1R mean?</summary>
+          <p>1R is the amount you risk on a trade — one unit of risk. A +2R winner on a $100 risk makes $200; a −1R loser loses the $100. Quoting results in R keeps strategy quality separate from position size and account size.</p>
+        </details>
+        <details>
+          <summary>Is my data uploaded anywhere?</summary>
+          <p>No. This page is plain JavaScript running in your browser. Nothing you type is sent to a server, logged, or stored.</p>
+        </details>
+      </div>
+
+      <h2>Related on the shelf</h2>
+      <p>Found a ratio you like? Use the <a href="/tools/position-size/">Position Size Calculator</a> to turn it into an actual order size. And if the last trade went badly, a <a href="https://calm.tradershelf.com/" target="_blank" rel="noopener">calm break</a> is cheaper than revenge trading.</p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container inner">
+      <div>© 2026 TraderShelf</div>
+      <nav>
+        <a href="/tools/position-size/">Position Size</a>
+        <a href="/tools/risk-reward/">Risk:Reward</a>
+        <a href="https://calm.tradershelf.com/" target="_blank" rel="noopener">Calm Breaks</a>
+      </nav>
+      <p class="footer-note">Trading involves substantial risk of loss. Nothing on this site is financial advice. All calculations run locally in your browser.</p>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    var fields = [$('f-entry'), $('f-stop'), $('f-target'), $('f-equity'), $('f-risk')];
+    var err = $('err');
+
+    function trimZeros(s) {
+      return s.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+    }
+    function fmtNum(v) {
+      if (!isFinite(v)) return '—';
+      var a = Math.abs(v);
+      if (a === 0) return '0';
+      if (a >= 1000) return v.toLocaleString('en-US', { maximumFractionDigits: 2 });
+      if (a >= 1) return trimZeros(v.toFixed(4));
+      return trimZeros(v.toPrecision(6));
+    }
+    function fmtUSD(v) { return '$' + fmtNum(v); }
+    function showErr(msg) {
+      err.textContent = msg;
+      err.classList.add('show');
+      ['r-rr','r-be','r-rdist','r-wdist','r-money','r-note-be'].forEach(function (id) { $(id).textContent = '—'; });
+      $('dir-badge').innerHTML = '';
+    }
+    function parse(input) {
+      var v = parseFloat(String(input.value).replace(/,/g, '').trim());
+      return isNaN(v) ? NaN : v;
+    }
+
+    function recalc() {
+      var entry = parse($('f-entry'));
+      var stop = parse($('f-stop'));
+      var target = parse($('f-target'));
+      var equity = parse($('f-equity'));
+      var riskPct = parse($('f-risk'));
+
+      fields.forEach(function (f) { f.classList.remove('bad'); });
+      err.classList.remove('show');
+
+      if (!(entry > 0)) { $('f-entry').classList.add('bad'); return showErr('Entry price must be a positive number.'); }
+      if (!(stop > 0)) { $('f-stop').classList.add('bad'); return showErr('Stop-loss price must be a positive number.'); }
+      if (!(target > 0)) { $('f-target').classList.add('bad'); return showErr('Take-profit price must be a positive number.'); }
+      if (entry === stop) { $('f-entry').classList.add('bad'); $('f-stop').classList.add('bad'); return showErr('Entry and stop can\u2019t be the same price.'); }
+      if ((target > entry) === (stop > entry)) {
+        $('f-stop').classList.add('bad'); $('f-target').classList.add('bad');
+        return showErr('Stop and target must sit on opposite sides of the entry price — otherwise this isn\u2019t a trade, it\u2019s a wish.');
+      }
+      if (!(equity > 0)) { $('f-equity').classList.add('bad'); return showErr('Account size must be a positive number.'); }
+      if (!(riskPct > 0) || riskPct > 100) { $('f-risk').classList.add('bad'); return showErr('Risk per trade must be between 0 and 100 percent.'); }
+
+      var isLong = target > entry;
+      var riskDist = Math.abs(entry - stop);
+      var rewardDist = Math.abs(target - entry);
+      var rr = rewardDist / riskDist;
+      var be = 1 / (1 + rr) * 100;
+
+      $('dir-badge').innerHTML =
+        '<span class="badge ' + (isLong ? 'long' : 'short') + '">' + (isLong ? 'LONG' : 'SHORT') + '</span>';
+      $('r-rr').textContent = '1 : ' + (Math.abs(rr) >= 100 ? fmtNum(rr) : trimZeros(rr.toFixed(2)));
+      $('r-be').textContent = be.toFixed(1) + '%';
+      $('r-rdist').textContent = fmtNum(riskDist) + ' from entry';
+      $('r-wdist').textContent = fmtNum(rewardDist) + ' from entry';
+
+      var riskAmt = equity * riskPct / 100;
+      var rewardAmt = riskAmt * rr;
+      $('r-money').textContent = fmtUSD(riskAmt) + ' / ' + fmtUSD(rewardAmt);
+      $('r-note-be').textContent = be.toFixed(1) + '%';
+    }
+
+    fields.forEach(function (f) { f.addEventListener('input', recalc); });
+    recalc();
+  })();
+  </script>
+</body>
+</html>

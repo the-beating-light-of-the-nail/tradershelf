@@ -1,0 +1,12 @@
+{
+  "name": "tradershelf",
+  "private": true,
+  "version": "1.0.0",
+  "description": "TraderShelf — free browser tools for traders. Static site, Cloudflare Workers assets.",
+  "type": "module",
+  "scripts": {
+    "og": "node scripts/gen-og.mjs",
+    "dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy"
+  }
+}
