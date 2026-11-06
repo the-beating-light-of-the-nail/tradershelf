@@ -5,6 +5,7 @@
 import snapRaw from '~/data/snapshot.json'
 import sectorCfgRaw from '~/data/sectors.config.json'
 import archiveIndexRaw from '~/data/archive-index.json'
+import { marketStatus } from '~/utils/session'
 
 export interface Stock {
   code: string
@@ -205,20 +206,7 @@ export function sectorReview(sec: SectorSnap): string {
   )
 }
 
-/* ---------- 交易时段（客户端 JSONP 自动刷新开关） ---------- */
+/* ---------- 交易时段（实现挪到 utils/session.ts，这里保留薄封装） ---------- */
 export function marketOpen(key: string): boolean {
-  try {
-    const now = new Date()
-    const cst = new Date(now.getTime() + (now.getTimezoneOffset() + 8 * 60) * 60000)
-    const day = cst.getDay()
-    const hm = cst.getHours() * 60 + cst.getMinutes()
-    if (key === 'a') return day >= 1 && day <= 5 && hm >= 9 * 60 + 15 && hm <= 15 * 60 + 5
-    if (key === 'hk') return day >= 1 && day <= 5 && hm >= 9 * 60 + 15 && hm <= 16 * 60 + 10
-    if (key === 'us') {
-      const inNight = hm >= 21 * 60 + 30 && day >= 1 && day <= 5
-      const inEarly = hm <= 5 * 60 && day >= 2 && day <= 6
-      return inNight || inEarly
-    }
-    return false
-  } catch { return false }
+  return marketStatus((key === 'a' || key === 'hk' || key === 'us' || key === 'crypto' ? key : 'a') as any).open
 }

@@ -6,7 +6,7 @@
       <span class="legend" :class="{ 'lg-intl': palette !== 'cn' }">
         <span>{{ palette === 'cn' ? '绿跌' : '红跌' }}</span><i class="lg-bar"></i><span>{{ palette === 'cn' ? '红涨' : '绿涨' }}</span>
       </span>
-      <span v-if="liveState" class="live-dot"><i></i>{{ liveState }}</span>
+      <span v-if="status" class="live-dot" :class="status.open ? 'is-open' : 'is-off'" :title="status.hint"><i></i>{{ badgeText }}</span>
       <button class="tm-full" type="button" @click="fullscreen">⛶ 全屏盯盘</button>
     </div>
 
@@ -28,7 +28,8 @@
 
 <script setup lang="ts">
 import { squarify, heatColor, fmtPct, type PaletteMode } from '~/utils/treemap'
-import { marketOpen, type Group, type Stock } from '~/utils/data'
+import { type Group, type Stock } from '~/utils/data'
+import { marketStatus, statusBadge, type MarketKey, type MarketStatus } from '~/utils/session'
 
 const props = withDefaults(
   defineProps<{
@@ -127,11 +128,24 @@ function fullscreen() {
   else el.requestFullscreen?.()
 }
 
+/* ---------- 交易时段徽章（客户端按市场所在时区判断；SSR 不渲染，避免水合不一致） ---------- */
+const sessionKey = computed<MarketKey>(
+  () => (props.marketKey as MarketKey) || (props.liveUrl ? 'crypto' : 'a'),
+)
+const status = ref<MarketStatus | null>(null)
+const badgeText = computed(() => (status.value ? statusBadge(status.value) : ''))
+let statusTimer: ReturnType<typeof setInterval> | null = null
+
 /* ---------- JSONP 盘中实时刷新（东财公开接口，浏览器直连） ---------- */
 const liveState = ref('')
 let liveTimer: ReturnType<typeof setInterval> | null = null
 function startLive() {
-  // 模式一：同源 JSON 轮询（crypto 等，走自家 Worker 代理，7×24 市场不判断交易时段）
+  // 时段状态：进页面算一次，之后每 30s 刷新（跨过收盘/午休时徽章自动切换）
+  status.value = marketStatus(sessionKey.value)
+  statusTimer = setInterval(() => { status.value = marketStatus(sessionKey.value) }, 30000)
+  onBeforeUnmount(() => { if (statusTimer) clearInterval(statusTimer) })
+
+  // 模式一：同源 JSON 轮询（crypto 等，7×24 不判断交易时段）
   if (props.liveUrl) {
     const refreshJson = async () => {
       try {
@@ -139,8 +153,7 @@ function startLive() {
         const body = await res.json()
         if (body && body.ok && Array.isArray(body.coins)) {
           applyLive(body.coins.map((c: any) => ({ f12: c.code, f3: c.pct, f2: c.price })))
-          const now = new Date()
-          liveState.value = '实时 ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')
+          liveState.value = 'synced'
         }
       } catch { /* 静默失败，保留静态快照 */ }
     }
@@ -149,22 +162,20 @@ function startLive() {
     onBeforeUnmount(() => { if (liveTimer) clearInterval(liveTimer) })
     return
   }
-  // 模式二：东财 JSONP（A股/美股/港股，仅交易时段）
+  // 模式二：东财 JSONP（A股/美股/港股，仅交易时段拉取）
   if (!props.liveFs || !props.marketKey) return
   const refresh = async () => {
-    if (!marketOpenLocal()) { liveState.value = '' ; return }
+    if (!status.value?.open) return // 收盘后不再打扰上游，徽章已显示「已收盘」
     try {
       const data = await jsonpClist(props.liveFs!)
       applyLive(data)
-      const now = new Date()
-      liveState.value = '实时 ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')
+      liveState.value = 'synced'
     } catch { /* 静默失败，保留静态快照 */ }
   }
   refresh()
   liveTimer = setInterval(refresh, 15000)
   onBeforeUnmount(() => { if (liveTimer) clearInterval(liveTimer) })
 }
-const marketOpenLocal = () => marketOpen(props.marketKey)
 
 function applyLive(diff: any[]) {
   const map = new Map<string, { pct: number; price: number }>()

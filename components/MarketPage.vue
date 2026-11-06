@@ -37,7 +37,7 @@
         <HeatMap
           :groups="m.groups()"
           :palette="m.palette"
-          :market-key="m.live ? m.key : ''"
+          :market-key="m.key"
           :live-fs="m.live ? m.liveFs : null"
           :live-url="m.liveUrl || null"
           :count-label="m.countLabel"

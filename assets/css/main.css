@@ -153,8 +153,11 @@ p { margin: 0 0 12px; }
   color: #aab6c5; border-radius: 8px; padding: 4px 12px; cursor: pointer; font-size: 12.5px;
 }
 .tm-full:hover { color: #fff; }
-.live-dot { display: inline-flex; align-items: center; gap: 5px; }
+.live-dot { display: inline-flex; align-items: center; gap: 5px; color: #cdd8e6; }
 .live-dot i { width: 7px; height: 7px; border-radius: 50%; background: #2ec27e; animation: pulse 1.6s infinite; }
+/* 收盘 / 休市：灰点不闪，避免「看着像还在跳」的误读 */
+.live-dot.is-off { color: #8b97a8; }
+.live-dot.is-off i { background: #7d8899; animation: none; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 
 .tm-stage {

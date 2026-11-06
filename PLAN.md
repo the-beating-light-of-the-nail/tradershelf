@@ -133,7 +133,7 @@ tradershelf/
 |---|---|---|
 | 美股 / 港股页面 + 配色翻转 | ✅ | 绿涨红跌 + 独立调色板，ESG/中概分组 |
 | Crypto 实时化 | ✅ | `worker/index.js` 边缘代理三源降级 **CoinGecko → CoinLore → CoinCap**（CoinGecko 免费额度对 Cloudflare 共享出口常返 429，实测 CoinLore 稳定）→ 页面 `/api/crypto` 每 60s 轮询；构建管线同样三级降级（直连 → 自家代理 → 上次快照），**永不伪造价格**；稳定币（USDT/USDC 等）从云图/表格/复盘文案中剔除 |
-| 交易时段状态 | ✅ | `HeatMap` 的 JSONP 模式只在开盘时段刷新，`liveState` 显示「实时 HH:MM」；收盘后停留收盘快照 |
+| 交易时段状态 | ✅ | `utils/session.ts` 按**市场所在时区**判断（Asia/Shanghai / America/New_York），徽章五态：交易中 HH:MM / 午间休市 / 未开盘（美股为盘前）/ 已收盘 / 周末休市，收盘灰点不闪；美股夏令时由 `Intl` 自动换算（此前硬编码 21:30，冬令时错一小时）；每 30s 重算，跨收盘自动切换。**已知边界**：不含法定节假日表，A股/港股假日会显示「交易中」，此时上游数据不更新、时间戳不推进 |
 | 收盘归档管线 | ✅ | `.github/workflows/daily-archive.yml`：交易日 16:10 抓数 → 构建 → 部署 → IndexNow → **把归档 JSON 回写仓库**（关键：否则每次 CI 新克隆会丢历史）；休市日无新归档自动跳过 |
 | IndexNow | ✅ | `scripts/indexnow.mjs`（key 见 `public/25bbee4fdfb142adbeb07fc3bfda0087.txt`），部署后自动推核心页 + 最近 3 天归档 |
 | AdSense 前置 4 页 | ✅ | about / privacy / disclaimer / contact 已上线；`AdSlot` 仍为占位，等过审换插码 |
