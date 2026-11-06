@@ -34,7 +34,7 @@ jobs:
           cache: npm
 
       - name: 安装依赖
-        run: npm ci --no-audit --no-fund
+        run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
 
       - name: 记录抓取前的归档数
         id: before
