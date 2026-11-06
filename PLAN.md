@@ -1,8 +1,10 @@
-# Trader Shelf · tradershelf.com — 项目规划 v0.1
+# Trader Shelf · tradershelf.com — 项目规划
 
-> 2026-11-06 立项。定位：**股票 / 证券 / Crypto 工具门户**——以「大盘云图」为引流爆款，长尾静态页矩阵吃搜索流量，广告 + affiliate 变现。
+> **2026-11-06 立项并当日完成 Phase 1 上线（生产站已带真数据运行）。**
+> 定位：**股票 / 证券 / Crypto 工具门户**——以「大盘云图」为引流爆款，长尾静态页矩阵吃搜索流量，广告 + affiliate 变现。
 > 初期目标：月 $20（中文财经 AdSense RPM 约 $1.5–4，需月 5,000–13,000 PV ≈ 日均 170–450 PV）。
-> 本文档是主规划；`demo/` 下三个 HTML 是设计演示（SEO 结构 / 长尾页模板 / 广告位 / UI），生产版本在其方向上开发。
+> 线上：**https://tradershelf.com**（Nuxt 3 SSG，47 路由，东财真数据）· 演示母版 https://demo.tradershelf.com
+> 日常更新：`npm run deploy`（抓数据 → generate → wrangler 部署，一条命令）。
 
 ---
 
