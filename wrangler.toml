@@ -13,4 +13,7 @@ routes = [
 [assets]
 directory = "./.output/public"
 not_found_handling = "404-page"
+# 目录式路由（/crypto、/xingtu）默认会 307 到带斜杠版本，白丢一跳；
+# 与 canonical / sitemap 的无斜杠形式对齐，统一去掉尾部斜杠
+html_handling = "drop-trailing-slash"
 # /api/* 等非资产路径落到 worker；静态路径优先直出资产

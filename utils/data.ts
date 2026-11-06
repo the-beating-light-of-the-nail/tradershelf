@@ -96,9 +96,16 @@ export function aGroups(): Group[] {
   return groups
 }
 
+/** 稳定币：24h 涨跌幅常年贴 0，留在云图里只会占大片中性色块，看盘价值为零 */
+const STABLES = new Set(['USDT', 'USDC', 'DAI', 'USDE', 'USDS', 'FDUSD', 'TUSD', 'BUSD', 'USDD', 'PYUSD', 'USDP', 'GUSD', 'FRAX', 'LUSD', 'USD1'])
+export const isStable = (code: string) => STABLES.has(String(code || '').toUpperCase())
+
 export function marketGroups(key: 'us' | 'hk' | 'crypto'): Group[] {
   const list: Stock[] = (snap as any)[key]?.coins || (snap as any)[key] || []
-  const stocks = list.filter((s) => typeof s.pct === 'number' && (s.fmcap || s.mcap) > 0).slice(0, 80)
+  const stocks = list
+    .filter((s) => typeof s.pct === 'number' && (s.fmcap || s.mcap) > 0)
+    .filter((s) => (key === 'crypto' ? !isStable(s.code) : true))
+    .slice(0, 80)
   const name = key === 'us' ? '美股' : key === 'hk' ? '港股' : 'Crypto'
   return [{ name, stocks }]
 }
@@ -152,7 +159,7 @@ export function marketReview(key: 'us' | 'hk' | 'crypto'): { lede: string; brief
     crypto: { idxCode: 'HSI', altCode: 'NDX', name: '加密货币市场', verb: '' },
   }[key]
   const list: Stock[] = (snap as any)[key]?.coins || (snap as any)[key] || []
-  const valid = list.filter((s) => typeof s.pct === 'number')
+  const valid = list.filter((s) => typeof s.pct === 'number' && (key === 'crypto' ? !isStable(s.code) : true))
   const best = [...valid].sort((a, b) => b.pct - a.pct)[0]
   const worst = [...valid].sort((a, b) => a.pct - b.pct)[0]
   const main = key === 'crypto' ? null : idx(map.idxCode)
@@ -175,7 +182,9 @@ export function marketReview(key: 'us' | 'hk' | 'crypto'): { lede: string; brief
       (worst ? `，${worst.name}下跌 ${Math.abs(worst.pct).toFixed(2)}%。` : '。') +
       `本页${map.name}热力图按市值排布、绿涨红跌（国际配色，与 A 股页自动区分），盘中自动刷新，收盘后归档可回看任意交易日。`
   }
-  const briefs = valid.slice(0, 3).map((s, i) => `[涨幅前${i + 1}] ${s.cname || s.name}（${s.code}）24h/当日 ${fp(s.pct)}，最新 ${fmtPrice(s.price)}。`)
+  // Crypto 的「涨幅前 3」要按涨幅排；美股/港股保持市值序（与表格一致）
+  const ranked = key === 'crypto' ? [...valid].sort((a, b) => b.pct - a.pct) : valid
+  const briefs = ranked.slice(0, 3).map((s, i) => `[涨幅前${i + 1}] ${s.cname || s.name}（${s.code}）24h/当日 ${fp(s.pct)}，最新 ${fmtPrice(s.price)}。`)
   return { lede, briefs }
 }
 

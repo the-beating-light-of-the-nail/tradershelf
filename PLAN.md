@@ -132,7 +132,7 @@ tradershelf/
 | 事项 | 状态 | 说明 |
 |---|---|---|
 | 美股 / 港股页面 + 配色翻转 | ✅ | 绿涨红跌 + 独立调色板，ESG/中概分组 |
-| Crypto 实时化 | 🟡 代码完成，待部署 | `worker/index.js` 反代 CoinGecko（边缘缓存 120s）→ 页面 `/api/crypto` 每 60s 轮询；构建管线三级降级（直连 → 自家代理 → 上次快照），**永不伪造价格** |
+| Crypto 实时化 | ✅ | `worker/index.js` 边缘代理三源降级 **CoinGecko → CoinLore → CoinCap**（CoinGecko 免费额度对 Cloudflare 共享出口常返 429，实测 CoinLore 稳定）→ 页面 `/api/crypto` 每 60s 轮询；构建管线同样三级降级（直连 → 自家代理 → 上次快照），**永不伪造价格**；稳定币（USDT/USDC 等）从云图/表格/复盘文案中剔除 |
 | 交易时段状态 | ✅ | `HeatMap` 的 JSONP 模式只在开盘时段刷新，`liveState` 显示「实时 HH:MM」；收盘后停留收盘快照 |
 | 收盘归档管线 | ✅ | `.github/workflows/daily-archive.yml`：交易日 16:10 抓数 → 构建 → 部署 → IndexNow → **把归档 JSON 回写仓库**（关键：否则每次 CI 新克隆会丢历史）；休市日无新归档自动跳过 |
 | IndexNow | ✅ | `scripts/indexnow.mjs`（key 见 `public/25bbee4fdfb142adbeb07fc3bfda0087.txt`），部署后自动推核心页 + 最近 3 天归档 |
@@ -142,6 +142,8 @@ tradershelf/
 **CI 需要在仓库配置的 Secrets**：`CLOUDFLARE_API_TOKEN`（Workers Scripts:Edit）、`CLOUDFLARE_ACCOUNT_ID`。未配置时 workflow 的部署步骤会失败，手工 `npm run deploy` 不受影响。
 
 **本地一条命令**：`npm run deploy` = 抓数据 → `nuxt generate` → `wrangler deploy` → IndexNow 推送。
+
+**路由形态**：`[assets] html_handling = "drop-trailing-slash"`，`/crypto` 直出 200（不再 307 到 `/crypto/`），与 canonical / sitemap 的无斜杠形式一致。
 
 ## 8. 风险与合规
 
