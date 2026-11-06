@@ -1,7 +1,7 @@
 {
   "name": "tradershelf",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
@@ -9,11 +9,11 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "data": "node scripts/fetch-data.mjs",
-    "deploy": "node scripts/fetch-data.mjs && nuxt generate && npx wrangler deploy",
+    "indexnow": "node scripts/indexnow.mjs",
+    "deploy": "node scripts/fetch-data.mjs && nuxt generate && npx wrangler deploy && node scripts/indexnow.mjs",
     "deploy:demo": "npx wrangler deploy -c wrangler.demo.toml"
   },
   "dependencies": {
-    "nuxt": "^3.17.0",
-    "tradershelf": "file:"
+    "nuxt": "^3.17.0"
   }
 }

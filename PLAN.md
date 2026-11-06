@@ -122,10 +122,26 @@ tradershelf/
 
 | 阶段 | 内容 | 验收标准 |
 |---|---|---|
-| **Phase 0（现在）** | 本规划 + `demo/` 三页设计演示；在演示上确认/修改方向、加内容 | 方向拍板 |
-| **Phase 1（1–2 周）** | Nuxt 骨架 + A股热力图真数据（盘中 Worker 代理）+ P0 6 页 + P1 前 12 页 + sitemap/robots + 上线 tradershelf.com | 20+ 页可访问，Bing Webmaster / GSC 就绪 |
-| **Phase 2（+2 周）** | 美股/港股/Crypto（配色翻转+时段状态）+ 收盘归档管线（Actions cron）+ IndexNow + AdSense 前置 4 页 | 归档页逐日累积并被收录；提交 AdSense |
-| **Phase 3** | 星图截流页、计算器矩阵、EN 版、浏览器插件（角标显上证/BTC，点击回主站） | 日 PV 200+ |
+| **Phase 0 ✅** | 本规划 + `demo/` 三页设计演示；在演示上确认/修改方向、加内容 | 方向拍板 |
+| **Phase 1 ✅** | Nuxt 骨架 + A股热力图真数据（盘中 Worker 代理）+ P0 6 页 + P1 前 12 页 + sitemap/robots + 上线 tradershelf.com | 20+ 页可访问，Bing Webmaster / GSC 就绪 |
+| **Phase 2（进行中）** | 美股/港股/Crypto（配色翻转+时段状态）+ 收盘归档管线（Actions cron）+ IndexNow + AdSense 前置 4 页 | 归档页逐日累积并被收录；提交 AdSense |
+| **Phase 3** | 计算器矩阵、EN 版、浏览器插件（角标显上证/BTC，点击回主站） | 日 PV 200+ |
+
+### Phase 2 进度明细（2026-11-06）
+
+| 事项 | 状态 | 说明 |
+|---|---|---|
+| 美股 / 港股页面 + 配色翻转 | ✅ | 绿涨红跌 + 独立调色板，ESG/中概分组 |
+| Crypto 实时化 | 🟡 代码完成，待部署 | `worker/index.js` 反代 CoinGecko（边缘缓存 120s）→ 页面 `/api/crypto` 每 60s 轮询；构建管线三级降级（直连 → 自家代理 → 上次快照），**永不伪造价格** |
+| 交易时段状态 | ✅ | `HeatMap` 的 JSONP 模式只在开盘时段刷新，`liveState` 显示「实时 HH:MM」；收盘后停留收盘快照 |
+| 收盘归档管线 | ✅ | `.github/workflows/daily-archive.yml`：交易日 16:10 抓数 → 构建 → 部署 → IndexNow → **把归档 JSON 回写仓库**（关键：否则每次 CI 新克隆会丢历史）；休市日无新归档自动跳过 |
+| IndexNow | ✅ | `scripts/indexnow.mjs`（key 见 `public/25bbee4fdfb142adbeb07fc3bfda0087.txt`），部署后自动推核心页 + 最近 3 天归档 |
+| AdSense 前置 4 页 | ✅ | about / privacy / disclaimer / contact 已上线；`AdSlot` 仍为占位，等过审换插码 |
+| 星图截流页 `/xingtu` | ✅ 提前完成 | PLAN 里本属 Phase 3，已上线并接入 sitemap/内链（侧栏「NEW」、页脚、首页工具架、首屏「换成星图看」） |
+
+**CI 需要在仓库配置的 Secrets**：`CLOUDFLARE_API_TOKEN`（Workers Scripts:Edit）、`CLOUDFLARE_ACCOUNT_ID`。未配置时 workflow 的部署步骤会失败，手工 `npm run deploy` 不受影响。
+
+**本地一条命令**：`npm run deploy` = 抓数据 → `nuxt generate` → `wrangler deploy` → IndexNow 推送。
 
 ## 8. 风险与合规
 

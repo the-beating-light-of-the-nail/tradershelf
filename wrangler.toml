@@ -1,7 +1,8 @@
-# Trader Shelf · 生产站（Nuxt SSG 产物直传根域）
-# 部署：npm run data && npx generate && npx wrangler deploy
-# 注意：routes 必须放在 [assets] 段之前，否则被 TOML 归进 assets 表、自定义域不生效
+# Trader Shelf · 生产站（Nuxt SSG 产物 + Crypto Worker 代理）
+# 部署：npm run deploy（= 抓数据 → generate → wrangler deploy → IndexNow 推送）
+# 注意：routes/main 必须放在 [assets] 段之前，否则被 TOML 归进 assets 表、自定义域静默不生效
 name = "tradershelf"
+main = "worker/index.js"
 compatibility_date = "2026-10-01"
 
 routes = [
@@ -12,3 +13,4 @@ routes = [
 [assets]
 directory = "./.output/public"
 not_found_handling = "404-page"
+# /api/* 等非资产路径落到 worker；静态路径优先直出资产

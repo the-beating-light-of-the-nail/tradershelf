@@ -39,6 +39,7 @@
           :palette="m.palette"
           :market-key="m.live ? m.key : ''"
           :live-fs="m.live ? m.liveFs : null"
+          :live-url="m.liveUrl || null"
           :count-label="m.countLabel"
           :size-label="m.sizeLabel"
           :aria-label="m.h1"

@@ -11,6 +11,7 @@ export default defineEventHandler((event) => {
     { loc: '/us', lastmod: today },
     { loc: '/hk', lastmod: today },
     { loc: '/crypto' },
+    { loc: '/xingtu', lastmod: today },
     { loc: '/archive' },
     { loc: '/about' }, { loc: '/privacy' }, { loc: '/disclaimer' }, { loc: '/contact' },
   ]

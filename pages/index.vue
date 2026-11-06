@@ -5,7 +5,7 @@
       <div class="wrap">
         <div class="hero-head">
           <h1>大盘云图 · A股全景热力图</h1>
-          <span class="upd">{{ tradeDate }} 收盘快照<span v-if="stale.length">（部分数据延迟）</span></span>
+          <span class="upd">{{ tradeDate }} 收盘快照<span v-if="stale.length">（部分数据延迟）</span> · <NuxtLink to="/xingtu">换成星图看 →</NuxtLink></span>
         </div>
         <MarketTabs />
         <HeatMap
@@ -94,7 +94,7 @@
               <div class="kicker"><span>财经工具逐渐上架 · 跨界工具将拆分到 tool.tradershelf.com</span></div>
               <div class="tool-grid">
                 <NuxtLink class="tool-item" to="/archive"><div class="t">每日复盘归档</div><div class="d">任意交易日云图与板块涨跌回看，收盘自动归档</div></NuxtLink>
-                <div class="tool-item"><div class="t">大盘星图 <span class="muted small">（规划中）</span></div><div class="d">星球图模式的另一种看盘姿势，东方财富星图对比评测</div></div>
+                <NuxtLink class="tool-item" to="/xingtu"><div class="t">大盘星图 <span class="muted small">NEW</span></div><div class="d">星系图模式的另一种看盘姿势，中心即权重核心</div></NuxtLink>
                 <div class="tool-item"><div class="t">指数估值表 <span class="muted small">（即将上线）</span></div><div class="d">沪深300/中证500 等主要指数 PE/PB 分位数每日更新</div></div>
                 <div class="tool-item"><div class="t">ETF 资金流向 <span class="muted small">（即将上线）</span></div><div class="d">主流 ETF 份额变化与净申购追踪</div></div>
                 <div class="tool-item"><div class="t">恐慌贪婪指数 <span class="muted small">（即将上线）</span></div><div class="d">Crypto 多空情绪仪表盘，24 小时更新</div></div>
@@ -157,7 +157,7 @@
                 <li><NuxtLink to="/us">美股大盘云图</NuxtLink></li>
                 <li><NuxtLink to="/hk">港股大盘云图</NuxtLink></li>
                 <li><NuxtLink to="/crypto">Crypto 热力图</NuxtLink></li>
-                <li><a href="#">大盘星图（对比评测）<span class="todo">规划中</span></a></li>
+                <li><NuxtLink to="/xingtu">大盘星图（对比评测）</NuxtLink></li>
               </ul>
             </div>
             <div class="lf-col">

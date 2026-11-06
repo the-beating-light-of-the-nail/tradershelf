@@ -6,17 +6,20 @@
 import { snap, marketGroups, marketReview } from '~/utils/data'
 
 const review = marketReview('crypto')
+// 构建时快照是否拿到实时源：拿不到就别在文案里自称实时（管线会沿用上次成功数据）
+const cryptoLive = !!snap.crypto?.live
 const m = {
   key: 'crypto',
   title: '加密货币热力图',
   h1: '加密货币热力图 · BTC / 以太坊全网市值云图（24h）',
   sub: '按市值排布的主流币热力图，颜色代表 24 小时涨跌幅——绿涨红跌（国际配色）。加密货币 7×24 全天候交易，无收盘概念。',
-  closeSuffix: ' 快照',
-  refreshLabel: '快照模式（实时行情接入中）',
+  closeSuffix: cryptoLive ? ' 实时' : ' 快照',
+  refreshLabel: cryptoLive ? '每 60 秒自动刷新（7×24）' : '实时源暂时不可用，展示最近一次成功抓取的币价',
   subs: ['市值前 30', 'DeFi', 'Meme', 'Layer2'],
   palette: 'intl-wide' as const,
   live: false,
   liveFs: null,
+  liveUrl: '/api/crypto',
   groups: () => marketGroups('crypto'),
   countLabel: 'Crypto · 市值前 30 币种',
   sizeLabel: '面积 = 流通市值（美元）',
@@ -24,13 +27,13 @@ const m = {
   capCol: '市值',
   tableTitle: '加密货币市值前 20 币种（24h）',
   tableRows: ((snap.crypto?.coins || []) as any[]).slice(0, 20).map((c) => ({ code: c.code, name: c.code, cname: c.cname, pct: c.pct, price: c.price, mcap: c.mcap })),
-  capNote: '市值为站内快照估值',
+  capNote: cryptoLive ? '市值按 CoinGecko 实时价计算' : '市值为最近一次成功抓取的快照',
   idxTitle: '跨市场参照',
   idxCards: (snap.indices || []).filter((i: any) => ['NDX', 'HSI'].includes(i.code)),
   faqTitle: '加密货币热力图常见问题',
   faqs: [
-    { q: 'Crypto 热力图的数据是实时的吗？', a: '当前为站内快照模式（约每个交易日更新），币价实时行情通道正在接入，届时页面将像 A 股页一样自动刷新。' },
-    { q: '热力图包含哪些币种？', a: '按流通市值排名的前 30 主流币种，覆盖 BTC、ETH、SOL 等公链与主流 DeFi、Meme 币，颜色代表 24 小时涨跌幅。' },
+    { q: 'Crypto 热力图的数据是实时的吗？', a: cryptoLive ? '是。币价经本站 Cloudflare 边缘代理从 CoinGecko 实时获取，页面每 60 秒自动刷新，中国大陆可直接访问，7×24 不间断。' : '实时行情通道已接通（边缘代理每 60 秒刷新），当前展示的是最近一次成功抓取的币价，打开页面后会自动尝试拉取最新价。' },
+    { q: '热力图包含哪些币种？', a: '按流通市值排名的前 30-40 主流币种，覆盖 BTC、ETH、SOL 等公链与主流 DeFi、Meme 币，颜色代表 24 小时涨跌幅。' },
     { q: '为什么 Crypto 用绿涨红跌？', a: '加密货币为全球市场，沿用国际配色惯例（绿涨红跌），与 A 股页面的红涨绿跌相反，图例已标注。' },
     { q: '本页内容构成投资建议吗？', a: '不构成。所有数据仅供参考，加密货币价格波动剧烈，交易前请自行研究并评估风险，本站不面向美国及受限地区居民。' },
   ],

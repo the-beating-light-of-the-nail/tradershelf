@@ -39,6 +39,7 @@ export default defineNuxtConfig({
       routes: [
         '/',
         '/us', '/hk', '/crypto',
+        '/xingtu',
         '/about', '/privacy', '/disclaimer', '/contact',
         '/archive',
         '/sitemap.xml',

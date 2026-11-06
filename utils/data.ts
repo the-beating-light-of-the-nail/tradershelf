@@ -160,10 +160,13 @@ export function marketReview(key: 'us' | 'hk' | 'crypto'): { lede: string; brief
 
   let lede = ''
   if (key === 'crypto') {
-    lede = `${d} 加密货币市场快照：市值前 30 币种中，` +
+    lede = `${d} 加密货币市场实时概览：市值前 30 币种中，` +
       (best ? `${best.name === best.cname ? best.cname : best.cname || best.name}24h 涨幅居前（${fp(best.pct)}）` : '') +
       (worst ? `，${worst.cname || worst.name}表现最弱（${fp(worst.pct)}）。` : '。') +
-      '加密货币 7×24 小时交易，本页热力图按市值排布、绿涨红跌（国际配色），数据为站内快照，实时行情接入中。'
+      '加密货币 7×24 小时交易，本页热力图按市值排布、绿涨红跌（国际配色），' +
+      (snap.crypto?.live
+        ? '币价经边缘代理每 60 秒自动刷新，中国大陆可直连。'
+        : '实时源暂时不可用，当前展示最近一次成功抓取的币价。')
   } else {
     lede = `${d}${map.verb} ${map.name}市场：` +
       (main ? `${main.name}${main.pct > 0 ? '上涨' : '下跌'} ${Math.abs(main.pct).toFixed(2)}% 报 ${fmtPrice(main.price)} 点，` : '') +

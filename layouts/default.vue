@@ -12,7 +12,7 @@
         <NuxtLink class="side-link" to="/us" :class="{ on: path === '/us' }">美股大盘云图</NuxtLink>
         <NuxtLink class="side-link" to="/hk" :class="{ on: path === '/hk' }">港股大盘云图</NuxtLink>
         <NuxtLink class="side-link" to="/crypto" :class="{ on: path === '/crypto' }">Crypto 热力图</NuxtLink>
-        <a class="side-link" href="#" title="Phase 2 上线">大盘星图<span style="margin-left:auto;font-size:11px;color:#5d6a7d">规划中</span></a>
+        <NuxtLink class="side-link" to="/xingtu" :class="{ on: path === '/xingtu' }">大盘星图<span style="margin-left:auto;font-size:11px;color:#f0b64a">NEW</span></NuxtLink>
 
         <div class="side-group">板块热力图</div>
         <NuxtLink
@@ -66,7 +66,7 @@
                 <li><NuxtLink to="/us">美股大盘云图</NuxtLink></li>
                 <li><NuxtLink to="/hk">港股大盘云图</NuxtLink></li>
                 <li><NuxtLink to="/crypto">Crypto 热力图</NuxtLink></li>
-                <li><a href="#">大盘星图<span style="color:#5d6a7d">（规划中）</span></a></li>
+                <li><NuxtLink to="/xingtu">大盘星图（网页版）</NuxtLink></li>
               </ul>
             </div>
             <div>

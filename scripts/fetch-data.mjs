@@ -123,8 +123,8 @@ async function main() {
       .slice(0, 60)
   } catch (e) { meta.stale.push('hk'); console.error('[warn] 港股抓取失败:', e.message) }
 
-  // ---------- 6) Crypto（大陆直连/代理均不可达 → 内置快照，Phase 2 接 Worker 代理后实时化） ----------
-  snap.crypto = { live: false, note: '加密货币行情为站内快照（约每交易日更新一次），实时行情接入中。', coins: cryptoFallback() }
+  // ---------- 6) Crypto（CoinGecko：直连 → 自家边缘代理 /api/crypto → 上次真实快照） ----------
+  snap.crypto = await fetchCrypto(meta)
 
   // ---------- 写盘 ----------
   mkdirSync('data', { recursive: true })
@@ -142,7 +142,63 @@ async function main() {
   console.log(`[ok] snapshot 完成 交易日=${meta.tradeDate} A股=${snap.a?.total ?? '-'}只 板块页=${snap.sectors.length}个 美股=${snap.us?.length ?? '-'} 港股=${snap.hk?.length ?? '-'} stale=[${meta.stale}]`)
 }
 
-/** Crypto 兜底快照（Phase 2 替换为 Worker 代理实时数据） */
+const CRYPTO_NAMES = JSON.parse(readFileSync(new URL('../data/crypto-names.json', import.meta.url), 'utf8'))
+
+/** 归一化两种形态：CoinGecko 原始数组（symbol/current_price/...）/ 自家 /api/crypto（code/price/pct/mcap） */
+function normalizeCoins(list) {
+  return list
+    .map((c) => {
+      const code = String(c.code || c.symbol || '').toUpperCase()
+      const price = typeof c.price === 'number' ? c.price : c.current_price
+      const pct = typeof c.pct === 'number' ? c.pct : c.price_change_percentage_24h
+      const mcap = c.mcap || c.market_cap || 0
+      return { code, name: c.name || code, cname: c.cname || CRYPTO_NAMES[code] || c.name || code, price, pct: pct ?? 0, mcap }
+    })
+    .filter((c) => c.code && typeof c.pct === 'number' && typeof c.price === 'number' && c.mcap > 0)
+}
+
+/**
+ * Crypto 三级降级：CoinGecko 直连（GitHub Actions 海外出口可用）
+ * → 自家边缘代理 /api/crypto（本机大陆环境可用）→ 上次成功快照（绝不伪造价格）
+ */
+async function fetchCrypto(meta = { stale: [] }) {
+  const SRC = [
+    {
+      name: 'coingecko',
+      url: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=40&page=1&price_change_percentage=24h',
+    },
+    { name: 'edge', url: 'https://tradershelf.com/api/crypto' },
+  ]
+  for (const s of SRC) {
+    try {
+      const d = await get(s.url, 1)
+      const rawList = Array.isArray(d) ? d : d && d.ok && Array.isArray(d.coins) ? d.coins : null
+      if (!rawList || !rawList.length) {
+        console.error('[warn] crypto 空数据:', s.name)
+        continue
+      }
+      const coins = normalizeCoins(rawList)
+      if (!coins.length) continue
+      console.log(`[ok] crypto 实时源=${s.name} ${coins.length} 币`)
+      return { live: true, source: s.name, updated: new Date().toISOString(), note: '', coins }
+    } catch (e) {
+      console.error('[warn] crypto 源失败:', s.name, e.message)
+    }
+  }
+  // 双源失败 → 沿用上次真实快照
+  try {
+    const prev = JSON.parse(readFileSync(new URL('../data/snapshot.json', import.meta.url), 'utf8'))
+    if (prev?.crypto?.coins?.length) {
+      meta.stale.push('crypto')
+      console.error('[warn] crypto 双源失败，沿用上次快照:', prev.crypto.updated || prev.meta?.fetchedAt)
+      return { ...prev.crypto, live: false, note: '实时源暂时不可用，展示最近一次成功抓取的币价。' }
+    }
+  } catch { /* 无历史快照 */ }
+  meta.stale.push('crypto')
+  return { live: false, source: 'builtin', note: '加密货币行情实时源暂不可用。', coins: cryptoFallback() }
+}
+
+/** Crypto 兜底快照（仅在「双源失败 + 无历史快照」时启用，保证构建不挂） */
 function cryptoFallback() {
   const c = (id, name, cname, price, pct, mcapB) => ({ code: id, name, cname, price, pct, mcap: mcapB * 1e9 })
   return [

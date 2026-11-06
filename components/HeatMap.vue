@@ -36,12 +36,14 @@ const props = withDefaults(
     palette?: PaletteMode
     marketKey?: string        // 'a' | 'us' | 'hk'，用于 JSONP 盘中刷新
     liveFs?: string | null    // 东财 clist fs 参数（传入即启用实时刷新）
+    liveUrl?: string | null   // 同源 JSON 轮询（如 /api/crypto），返回 {coins:[{code,pct,price}]}
+    liveInterval?: number     // 轮询间隔 ms（liveUrl 模式，默认 60s）
     countLabel?: string
     sizeLabel?: string
     foot?: string
     ariaLabel?: string
   }>(),
-  { palette: 'cn', marketKey: '', liveFs: null, sizeLabel: '面积 = 流通市值' },
+  { palette: 'cn', marketKey: '', liveFs: null, liveUrl: null, liveInterval: 60000, sizeLabel: '面积 = 流通市值' },
 )
 
 /* ---------- 分组数据（可被 JSONP 实时合并更新） ---------- */
@@ -129,6 +131,25 @@ function fullscreen() {
 const liveState = ref('')
 let liveTimer: ReturnType<typeof setInterval> | null = null
 function startLive() {
+  // 模式一：同源 JSON 轮询（crypto 等，走自家 Worker 代理，7×24 市场不判断交易时段）
+  if (props.liveUrl) {
+    const refreshJson = async () => {
+      try {
+        const res = await fetch(props.liveUrl!, { headers: { accept: 'application/json' } })
+        const body = await res.json()
+        if (body && body.ok && Array.isArray(body.coins)) {
+          applyLive(body.coins.map((c: any) => ({ f12: c.code, f3: c.pct, f2: c.price })))
+          const now = new Date()
+          liveState.value = '实时 ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')
+        }
+      } catch { /* 静默失败，保留静态快照 */ }
+    }
+    refreshJson()
+    liveTimer = setInterval(refreshJson, props.liveInterval)
+    onBeforeUnmount(() => { if (liveTimer) clearInterval(liveTimer) })
+    return
+  }
+  // 模式二：东财 JSONP（A股/美股/港股，仅交易时段）
   if (!props.liveFs || !props.marketKey) return
   const refresh = async () => {
     if (!marketOpenLocal()) { liveState.value = '' ; return }
