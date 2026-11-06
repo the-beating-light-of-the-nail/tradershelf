@@ -146,6 +146,16 @@ tradershelf/
 **路由形态**：`[assets] html_handling = "drop-trailing-slash"`，`/crypto` 直出 200（不再 307 到 `/crypto/`），与 canonical / sitemap 的无斜杠形式一致。
 **404 处理**：`not_found_handling = "none"` + `binding = "ASSETS"`，未命中路径由 worker 渲染站内 404 页、**保持 404 状态码**（若用 `"404-page"`，Cloudflare 会 307 到 `/404` 且返回 200，形成软 404）。
 
+### Phase 2 验收记录（2026-11-06 晚，对标竞品实测）
+
+**功能/SEO 验收通过**（全部线上实测）：15 路由全 200 + 未知路径真 404；SSR 文本层完好（首页 497 tiles / 星图 220 星体 / 板块页表格 + 2 组 JSON-LD）；`/api/crypto` 三源降级实测 CoinLore 实时生效（BTC/ETH 24h 真价）；稳定币过滤正常——线上"Tether"实为 **XAUT 黄金币**（非稳定币，合理保留）、"USDT"字样来自 FAQ 文案，均非 bug；canonical/OG/schema/缓存/demo-noindex 全过；IndexNow key 线上可达 + dry-run 7 URL 正常。
+
+**竞品对标结论**（52etf.site / dapan.app / stock.wenyaoyefei.com 实测抓取）：三家热力图全部是**纯 JS 画布、HTML 源码里零股票文本**（dapan.app 首屏仅"热力图加载中..."，stock.wenyaoyefei 连标题都是英文），52etf 有 FAQ+复盘时间轴但同样无 SSR 个股层——**SSR 文本层 + 归档矩阵是全赛道唯一**；功能层差距（缩放钻取/截图分享/自选股/雪球跳转）属 Phase 3+。
+
+**⚠ P0 待决——同名仓库双项目冲突**：GitHub `the-beating-light-of-the-nail/tradershelf`（2026-11-06 12:02 另一会话创建）装着**另一个项目**：英文纯静态计算器站（仓位/risk-reward 工具，14 文件），其 wrangler.toml 同样 `name="tradershelf"` + 挂 tradershelf.com。该站从未部署（workers 部署史最早为本项目 16:28 首部署，无覆盖事故），但**两边谁后 deploy 谁覆盖生产 worker**。候选：A. 本项目为正主，收编两个计算器进 `/tools/`（public/ 直通零改造），旧仓改名让位；B. 静态站为正主，本项目换名/域；C. 静态站拆去 tool.tradershelf.com。**倾向 A**（金融工具按既定决策应住主域子目录，且计算器本就在 Phase 3 规划内）。
+
+**待办**：① 仓库冲突拍板；② 配 Secrets（`CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`）激活收盘管线；③ 本机 git 传输全挂（SSL_ERROR_SYSCALL，代理亦挂、API 通），恢复后需将本地全史对齐远端（远端 2 提交是另一项目，处置依赖 ①）。
+
 ## 8. 风险与合规
 
 - **License**：两个参考项目均 MIT（2026-11-06 核实：stock-market-cloud、a-share-heatmap）。搬代码须在 `THIRD_PARTY_NOTICES.md` 保留原版权声明。
