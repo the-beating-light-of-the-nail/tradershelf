@@ -1,0 +1,14 @@
+# Trader Shelf · 生产站（Nuxt SSG 产物直传根域）
+# 部署：npm run data && npx generate && npx wrangler deploy
+# 注意：routes 必须放在 [assets] 段之前，否则被 TOML 归进 assets 表、自定义域不生效
+name = "tradershelf"
+compatibility_date = "2026-10-01"
+
+routes = [
+  { pattern = "tradershelf.com", custom_domain = true },
+  { pattern = "www.tradershelf.com", custom_domain = true }
+]
+
+[assets]
+directory = "./.output/public"
+not_found_handling = "404-page"

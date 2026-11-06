@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!--
+  ██ Trader Shelf · 门户首页设计演示（2026-11-06）
+  · 纯静态零依赖：双击即可在浏览器打开，数据全部为占位
+  · 本页演示：首屏热力图 + 市场Tab / 每日自动复盘卡 / 行业冷暖 / 资金流 /
+    工具架 / 页脚长尾内链矩阵 / 广告位 A·B·D·E / WebSite 结构化数据
+  · 生产路线见 ../PLAN.md（Nuxt 3 SSG + Cloudflare Workers 直传）
+-->
+<title>大盘云图_股票热力图_美股港股Crypto行情云图 - Trader Shelf</title>
+<meta name="description" content="Trader Shelf 大盘云图：一个页面看全 A股、美股、港股与加密货币热力图，按市值呈现个股与板块涨跌全景，收盘后自动生成每日复盘与板块归档，免费在线盯盘工具。">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://tradershelf.com/">
+<meta name="theme-color" content="#0c1017">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Trader Shelf">
+<meta property="og:title" content="大盘云图_股票热力图_美股港股Crypto行情云图 - Trader Shelf">
+<meta property="og:description" content="A股/美股/港股/Crypto 实时热力图 + 每日自动复盘归档，免费在线盯盘。">
+<meta property="og:url" content="https://tradershelf.com/">
+<!-- 生产：脚本生成 1200×630 -->
+<meta property="og:image" content="https://tradershelf.com/og-home.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c1017'/%3E%3Crect x='6' y='8' width='20' height='4' rx='1.5' fill='%23f0b64a'/%3E%3Crect x='6' y='14' width='12' height='4' rx='1.5' fill='%23d9303e'/%3E%3Crect x='6' y='20' width='20' height='4' rx='1.5' fill='%230e9f77'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  /* 页面私有：演示标注 + 小号 tile 修正 */
+  .demo-note{margin:14px 0;padding:9px 14px;border-left:3px solid var(--gold);background:#fdf6e7;color:#8a6a1f;border-radius:0 8px 8px 0;font-size:13px;line-height:1.7}
+  .tm-stage .sm{font-size:13px}
+  .card > h2{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"Trader Shelf 大盘云图","alternateName":"交易者的工具架","url":"https://tradershelf.com/","inLanguage":"zh-CN","description":"A股、美股、港股与加密货币实时大盘云图热力图，含每日复盘归档与板块热力图长尾页矩阵。"}
+</script>
+</head>
+<body>
+
+<!-- ======== 左侧导航工作台（桌面固定左栏，移动端收抽屉；etf.maxmeng.top 式） ======== -->
+<div class="shell">
+<aside class="sidebar">
+  <a class="logo side-logo" href="index.html">
+    <span class="logo-mark"><i></i><i></i><i></i><i></i></span>
+    Trader<em>Shelf</em>
+  </a>
+  <nav class="side-nav" aria-label="主导航">
+    <div class="side-group">市场热力图</div>
+    <a class="side-link on" href="index.html">A股大盘云图</a>
+    <a class="side-link" href="us.html">美股大盘云图</a>
+    <a class="side-link" href="#">港股大盘云图</a>
+    <a class="side-link" href="#">Crypto 热力图</a>
+    <a class="side-link" href="#">大盘星图</a>
+    <div class="side-group">板块热力图</div>
+    <a class="side-link" href="sector-semiconductor.html">半导体</a>
+    <a class="side-link" href="#">人工智能</a>
+    <a class="side-link" href="#">CPO光模块</a>
+    <a class="side-link" href="#">券商</a>
+    <a class="side-link" href="#">白酒</a>
+    <div class="side-group">工具与归档</div>
+    <a class="side-link" href="#">每日归档</a>
+    <a class="side-link" href="#">恐慌贪婪指数</a>
+    <a class="side-link" href="#">网格计算器</a>
+    <a class="side-link" href="#">复利计算器</a>
+  </nav>
+  <div class="side-foot">
+    <button class="nav-cta side-fav" type="button" title="Ctrl+D 收藏本站，每个交易日开盘即看">★ 收藏看盘</button>
+    <div class="side-links-row"><a href="#">关于</a><a href="#">隐私</a><a href="#">免责</a><a href="#">联系</a></div>
+  </div>
+</aside>
+<div class="side-mask" aria-hidden="true"></div>
+<div class="main">
+  <div class="mobilebar">
+    <button class="burger" type="button" aria-label="打开导航">☰</button>
+    <a class="logo" href="index.html"><span class="logo-mark"><i></i><i></i><i></i><i></i></span> Trader<em>Shelf</em></a>
+  </div>
+
+<!-- ======== 首屏：深色盯盘区（A股全景热力图） ======== -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-head">
+      <h1>大盘云图 · A股全景热力图</h1>
+      <span class="upd">2026-11-06 15:00 收盘快照 · <b>演示数据</b> · 盘中每 10 秒自动刷新</span>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="市场切换">
+      <span class="tab on" aria-current="true">🇨🇳 A股全景</span>
+      <a class="tab" href="us.html">🇺🇸 美股</a>
+      <a class="tab" href="#">🇭🇰 港股</a>
+      <a class="tab" href="#">₿ Crypto</a>
+      <a class="tab" href="#">✦ 大盘星图</a>
+    </div>
+
+    <div class="tm-toolbar">
+      <span>沪深全A · 5,362 只</span>
+      <span>面积 = 流通市值</span>
+      <span class="legend"><span>绿跌</span><i class="lg-bar"></i><span>红涨</span></span>
+      <span class="num">-5% ~ +5%</span>
+      <button class="tm-full" type="button">⛶ 全屏盯盘</button>
+    </div>
+
+    <!-- 生产环境：此区域为 Canvas/treemap 实时渲染；同源数据同步输出到下方卡片与表格，保证爬虫可读 -->
+    <div class="tm-stage" aria-label="A股大盘云图热力图（演示）">
+      <div class="tm-cell" style="left:0;top:0;width:30%;height:34%;background:#8f4a42" title="工商银行 +0.32%"><span class="tm-name">工商银行</span><span class="tm-chg">+0.32%</span></div>
+      <div class="tm-cell" style="left:30%;top:0;width:35%;height:34%;background:#c04a42" title="贵州茅台 +1.24%"><span class="tm-name">贵州茅台</span><span class="tm-chg">+1.24%</span></div>
+      <div class="tm-cell" style="left:65%;top:0;width:35%;height:34%;background:#3d6f5d" title="宁德时代 -0.87%"><span class="tm-name">宁德时代</span><span class="tm-chg">-0.87%</span></div>
+
+      <div class="tm-cell" style="left:0;top:34%;width:18%;height:28%;background:#36445f" title="农业银行 +0.15%"><span class="tm-name">农业银行</span><span class="tm-chg">+0.15%</span></div>
+      <div class="tm-cell" style="left:18%;top:34%;width:18%;height:28%;background:#8f4a42" title="中国石油 +0.86%"><span class="tm-name">中国石油</span><span class="tm-chg">+0.86%</span></div>
+      <div class="tm-cell" style="left:36%;top:34%;width:22%;height:28%;background:#c04a42" title="比亚迪 +1.92%"><span class="tm-name">比亚迪</span><span class="tm-chg">+1.92%</span></div>
+      <div class="tm-cell" style="left:58%;top:34%;width:20%;height:28%;background:#36445f" title="长江电力 +0.11%"><span class="tm-name">长江电力</span><span class="tm-chg">+0.11%</span></div>
+      <div class="tm-cell" style="left:78%;top:34%;width:22%;height:28%;background:#2e8a5f" title="中国平安 -1.15%"><span class="tm-name">中国平安</span><span class="tm-chg">-1.15%</span></div>
+
+      <div class="tm-cell sm" style="left:0;top:62%;width:15%;height:20%;background:#3d6f5d" title="招商银行 -0.44%"><span class="tm-name">招商银行</span><span class="tm-chg">-0.44%</span></div>
+      <div class="tm-cell sm" style="left:15%;top:62%;width:17%;height:20%;background:#b31b1b" title="中芯国际 +4.21%"><span class="tm-name">中芯国际</span><span class="tm-chg">+4.21%</span></div>
+      <div class="tm-cell sm" style="left:32%;top:62%;width:16%;height:20%;background:#a01212" title="寒武纪 +6.98%"><span class="tm-name">寒武纪</span><span class="tm-chg">+6.98%</span></div>
+      <div class="tm-cell sm" style="left:48%;top:62%;width:15%;height:20%;background:#ad1717" title="海光信息 +5.40%"><span class="tm-name">海光信息</span><span class="tm-chg">+5.40%</span></div>
+      <div class="tm-cell sm" style="left:63%;top:62%;width:17%;height:20%;background:#cf3d33" title="紫金矿业 +2.15%"><span class="tm-name">紫金矿业</span><span class="tm-chg">+2.15%</span></div>
+      <div class="tm-cell sm" style="left:80%;top:62%;width:20%;height:20%;background:#c04a42" title="中信证券 +1.33%"><span class="tm-name">中信证券</span><span class="tm-chg">+1.33%</span></div>
+
+      <div class="tm-cell sm" style="left:0;top:82%;width:13%;height:18%;background:#cf3d33" title="工业富联 +2.87%"><span class="tm-name">工业富联</span><span class="tm-chg">+2.87%</span></div>
+      <div class="tm-cell sm" style="left:13%;top:82%;width:13%;height:18%;background:#1f9c63" title="隆基绿能 -2.31%"><span class="tm-name">隆基绿能</span><span class="tm-chg">-2.31%</span></div>
+      <div class="tm-cell sm" style="left:26%;top:82%;width:13%;height:18%;background:#178052" title="药明康德 -3.05%"><span class="tm-name">药明康德</span><span class="tm-chg">-3.05%</span></div>
+      <div class="tm-cell sm" style="left:39%;top:82%;width:13%;height:18%;background:#8f4a42" title="京东方A +0.75%"><span class="tm-name">京东方A</span><span class="tm-chg">+0.75%</span></div>
+      <div class="tm-cell sm" style="left:52%;top:82%;width:13%;height:18%;background:#2e8a5f" title="立讯精密 -1.62%"><span class="tm-name">立讯精密</span><span class="tm-chg">-1.62%</span></div>
+      <div class="tm-cell sm" style="left:65%;top:82%;width:13%;height:18%;background:#0f7a46" title="万科A -4.08%"><span class="tm-name">万科A</span><span class="tm-chg">-4.08%</span></div>
+      <div class="tm-cell sm" style="left:78%;top:82%;width:12%;height:18%;background:#cf3d33" title="中远海控 +3.42%"><span class="tm-name">中远海控</span><span class="tm-chg">+3.42%</span></div>
+      <div class="tm-cell sm" style="left:90%;top:82%;width:10%;height:18%;background:#1f9c63" title="中国中免 -2.24%"><span class="tm-name">中国中免</span><span class="tm-chg">-2.24%</span></div>
+    </div>
+
+    <p class="hero-foot">热力图按流通市值排布、颜色代表当日涨跌幅（红涨绿跌，A 股习惯配色）。为便于搜索引擎与无障碍访问，图下方的复盘卡片与数据表格由同源行情自动生成 HTML 文本。数据来自公开行情接口，可能存在延迟，仅供参考，不构成投资建议。</p>
+  </div>
+</section>
+
+<!-- 广告位 A：首屏下方响应式横幅（过审后用 <ins class="adsbygoogle"> 替换本占位；首月每页 ≤2 个广告位） -->
+<aside class="wrap">
+  <div class="ad-slot ad-banner" aria-label="广告位">
+    <span class="t1">广告位 A · 响应式横幅</span>
+    <span class="t2">AdSense Display 预留（970×90 / 320×100）· 过审后启用</span>
+  </div>
+</aside>
+
+<!-- ======== 浅色门户内容区（信息增量层，喂爬虫 + 承载广告） ======== -->
+<div class="light-zone">
+  <div class="wrap">
+    <div class="layout">
+
+      <main>
+        <!-- 今日复盘：Programmatic SEO 核心 -->
+        <p class="demo-note">⚙ 演示说明：以下「今日复盘 / 行业冷暖 / 资金流向 / 涨跌家数」在生产环境由收盘数据管线（每交易日 16:10）按模板自动生成并静态化——这是本站相对开源竞品（dapan.app 等）的核心信息增量层，无需人工维护。</p>
+
+        <section class="card">
+          <h2>今日复盘 · 2026年11月6日 <a class="small" href="#">阅读完整复盘 →</a></h2>
+          <div class="kicker"><span class="badge">自动生成</span><span>每交易日 16:10 更新 · 数据为演示占位</span></div>
+          <ul class="brief-list">
+            <li><span class="tag-mkt">[A股]</span>沪指收涨 <b class="pos-cn num">0.31%</b> 报 <span class="num">3,428.15</span> 点，创业板指涨 <b class="pos-cn num">1.05%</b>；全市场 3,214 家上涨、1,872 家下跌，成交 <span class="num">1.42</span> 万亿元，赚钱效应回暖。</li>
+            <li><span class="tag-mkt">[板块]</span>半导体链全线爆发（<a href="sector-semiconductor.html">板块 +2.41%</a>），<a href="#">寒武纪</a>涨 6.98%、<a href="#">海光信息</a>涨 5.40%；主力资金净流入 86.3 亿元居全行业第一。</li>
+            <li><span class="tag-mkt">[港股]</span>恒生指数跌 <b class="neg-cn num">0.42%</b>，科技股分化；南向资金净买入 28 亿港元。</li>
+            <li><span class="tag-mkt">[Crypto]</span>BTC 站上 <span class="num">97,412</span> USDT（24h <b class="pos-intl num">+1.9%</b>），全网多空比 1.05，恐慌贪婪指数 68（贪婪）。</li>
+          </ul>
+        </section>
+
+        <section class="bento">
+          <div class="card">
+            <h2>行业冷暖 · 概念轮动</h2>
+            <div class="kicker"><span>领涨板块（点击进入板块热力图）</span></div>
+            <div class="chips">
+              <a class="chip" href="sector-semiconductor.html">半导体 <b class="pos-cn">+3.10%</b></a>
+              <a class="chip" href="#">教育 <b class="pos-cn">+2.42%</b></a>
+              <a class="chip" href="#">CPO光模块 <b class="pos-cn">+2.08%</b></a>
+              <a class="chip" href="#">算力租赁 <b class="pos-cn">+1.63%</b></a>
+              <a class="chip" href="#">券商 <b class="pos-cn">+1.21%</b></a>
+            </div>
+            <div class="kicker" style="margin-top:14px"><span>领跌板块</span></div>
+            <div class="chips">
+              <a class="chip" href="#">房地产 <b class="neg-cn">-2.31%</b></a>
+              <a class="chip" href="#">白酒 <b class="neg-cn">-1.82%</b></a>
+              <a class="chip" href="#">银行 <b class="neg-cn">-0.61%</b></a>
+              <a class="chip" href="#">黄金 <b class="neg-cn">-0.43%</b></a>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>跨市场核心指标</h2>
+            <div class="kicker"><span>A股/港股 红涨绿跌 · 美股/Crypto 绿涨红跌</span></div>
+            <div class="idx-grid">
+              <div class="idx"><div class="n">上证指数</div><div class="v num">3,428.15</div><div class="c pos-cn num">+0.31%</div></div>
+              <div class="idx"><div class="n">深证成指</div><div class="v num">11,256.30</div><div class="c pos-cn num">+0.58%</div></div>
+              <div class="idx"><div class="n">创业板指</div><div class="v num">2,384.12</div><div class="c pos-cn num">+1.05%</div></div>
+              <div class="idx"><div class="n">恒生指数</div><div class="v num">20,721.36</div><div class="c neg-cn num">-0.42%</div></div>
+              <div class="idx"><div class="n">纳斯达克(昨收)</div><div class="v num">19,742.88</div><div class="c pos-intl num">+0.18%</div></div>
+              <div class="idx"><div class="n">BTC / USDT</div><div class="v num">97,412</div><div class="c pos-intl num">+1.90%</div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 广告位 B：信息流原生（卡片流之间，中长期收入主力；AdSense 原生广告或 in-feed 单元） -->
+        <div class="ad-slot ad-inread" aria-label="广告位">
+          <span class="t1">广告位 B · 信息流原生</span>
+          <span class="t2">in-feed 原生广告预留 · 与卡片同构不遮挡交互</span>
+        </div>
+
+        <section class="card">
+          <h2>交易者的工具架</h2>
+          <div class="kicker"><span>财经工具逐渐上架 · 跨界工具将拆分到 tool.tradershelf.com</span></div>
+          <div class="tool-grid">
+            <a class="tool-item" href="#"><div class="t">每日复盘归档</div><div class="d">任意交易日云图与板块涨跌回看，收盘自动归档</div></a>
+            <a class="tool-item" href="#"><div class="t">大盘星图 <span class="muted small">（规划中）</span></div><div class="d">星球图模式的另一种看盘姿势，东方财富星图对比评测</div></a>
+            <a class="tool-item" href="#"><div class="t">指数估值表 <span class="muted small">（即将上线）</span></div><div class="d">沪深300/中证500 等主要指数 PE/PB 分位数每日更新</div></a>
+            <a class="tool-item" href="#"><div class="t">ETF 资金流向 <span class="muted small">（即将上线）</span></div><div class="d">主流 ETF 份额变化与净申购追踪</div></a>
+            <a class="tool-item" href="#"><div class="t">恐慌贪婪指数 <span class="muted small">（即将上线）</span></div><div class="d">Crypto 多空情绪仪表盘，24 小时更新</div></a>
+            <a class="tool-item" href="#"><div class="t">网格交易计算器 <span class="muted small">（即将上线）</span></div><div class="d">区间/格数/仓位一键回测</div></a>
+            <a class="tool-item" href="#"><div class="t">复利定投计算器 <span class="muted small">（即将上线）</span></div><div class="d">目标收益与定投压力测试</div></a>
+            <a class="tool-item" href="#"><div class="t">个股云图搜索 <span class="muted small">（即将上线）</span></div><div class="d">输入名称/代码直达个股热力卡与历史归档</div></a>
+          </div>
+        </section>
+      </main>
+
+      <!-- 侧栏 -->
+      <div class="aside-col">
+        <div class="ad-slot ad-rect ad-dark" aria-label="广告位">
+          <span class="t1">广告位 D · 侧栏矩形</span>
+          <span class="t2">300×250 预留 · 跟随滚动</span>
+        </div>
+
+        <div class="card">
+          <h2>大盘涨跌家数</h2>
+          <div class="kicker"><span>2026-11-06 收盘 · 演示数据</span></div>
+          <div class="updown">
+            <div>上涨 <b class="pos-cn num">3,214</b> · 下跌 <b class="neg-cn num">1,872</b> · 平盘 <span class="num">218</span></div>
+            <div class="bar"><i class="b-up" style="width:60%"></i><i class="b-dn" style="width:35%"></i><i style="width:5%;background:#8b95a1"></i></div>
+            <div class="small muted">两市成交 1.42 万亿元（较昨日 +1,150 亿）</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>主力资金流向</h2>
+          <div class="kicker"><span>行业净流入 / 净流出（亿元）</span></div>
+          <div class="flow-row"><div class="lbl"><span>半导体</span><b class="pos-cn num">+86.3</b></div><div class="trk"><i style="width:100%;background:var(--up-cn)"></i></div></div>
+          <div class="flow-row"><div class="lbl"><span>算力硬件</span><b class="pos-cn num">+52.1</b></div><div class="trk"><i style="width:60%;background:var(--up-cn)"></i></div></div>
+          <div class="flow-row"><div class="lbl"><span>CPO光模块</span><b class="pos-cn num">+31.4</b></div><div class="trk"><i style="width:36%;background:var(--up-cn)"></i></div></div>
+          <div class="flow-row"><div class="lbl"><span>白酒</span><b class="neg-cn num">-24.6</b></div><div class="trk"><i style="width:29%;background:var(--down-cn)"></i></div></div>
+          <div class="flow-row"><div class="lbl"><span>银行</span><b class="neg-cn num">-16.2</b></div><div class="trk"><i style="width:19%;background:var(--down-cn)"></i></div></div>
+        </div>
+
+        <div class="card">
+          <h2>最近归档</h2>
+          <div class="kicker"><span>每日收盘自动生成 · IndexNow 秒推送</span></div>
+          <ul class="brief-list small">
+            <li><a href="#">11-06 复盘：沪指 +0.31%，半导体领涨</a></li>
+            <li><a href="#">11-05 复盘：沪指 -0.87%，缩量调整</a></li>
+            <li><a href="#">11-04 复盘：沪指 +1.62%，放量普涨</a></li>
+            <li><a href="#">11-03 复盘：沪指 +0.12%，窄幅震荡</a></li>
+            <li><a href="#">10-31 复盘：沪指 -0.44%，周线收官</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== 底部长尾内链矩阵：爬虫一跳触达所有内页 ======== -->
+    <section class="linkfarm">
+      <h2>热门看图入口</h2>
+      <div class="lf-grid">
+        <div class="lf-col">
+          <h3>指数云图</h3>
+          <ul>
+            <li><a href="#">沪深300大盘云图<span class="todo">待建</span></a></li>
+            <li><a href="#">中证500热力图<span class="todo">待建</span></a></li>
+            <li><a href="#">上证50云图<span class="todo">待建</span></a></li>
+            <li><a href="#">创业板大盘云图<span class="todo">待建</span></a></li>
+            <li><a href="#">科创50热力图<span class="todo">待建</span></a></li>
+            <li><a href="#">恒生科技指数云图<span class="todo">待建</span></a></li>
+          </ul>
+        </div>
+        <div class="lf-col">
+          <h3>板块热力图</h3>
+          <ul>
+            <li><a href="sector-semiconductor.html">半导体板块热力图</a></li>
+            <li><a href="#">人工智能概念云图<span class="todo">待建</span></a></li>
+            <li><a href="#">CPO光模块热力图<span class="todo">待建</span></a></li>
+            <li><a href="#">券商板块云图<span class="todo">待建</span></a></li>
+            <li><a href="#">白酒板块热力图<span class="todo">待建</span></a></li>
+            <li><a href="#">红利低波热力图<span class="todo">待建</span></a></li>
+          </ul>
+        </div>
+        <div class="lf-col">
+          <h3>市场云图</h3>
+          <ul>
+            <li><a href="index.html">A股大盘云图</a></li>
+            <li><a href="us.html">美股大盘云图</a></li>
+            <li><a href="#">港股大盘云图<span class="todo">待建</span></a></li>
+            <li><a href="#">Crypto 热力图<span class="todo">待建</span></a></li>
+            <li><a href="#">大盘星图（对比评测）<span class="todo">待建</span></a></li>
+            <li><a href="#">每日归档 &gt;&gt;</a></li>
+          </ul>
+        </div>
+        <div class="lf-col">
+          <h3>工具与站点</h3>
+          <ul>
+            <li><a href="#">恐慌贪婪指数<span class="todo">待建</span></a></li>
+            <li><a href="#">网格交易计算器<span class="todo">待建</span></a></li>
+            <li><a href="#">复利定投计算器<span class="todo">待建</span></a></li>
+            <li><a href="#">关于本站</a></li>
+            <li><a href="#">隐私政策</a></li>
+            <li><a href="#">免责声明</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 广告位 E：底部横幅（次级位，过审后可后开） -->
+    <div class="ad-slot ad-banner" aria-label="广告位">
+      <span class="t1">广告位 E · 底部横幅</span>
+      <span class="t2">AdSense Display 预留 · 次级位置</span>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 页脚 ======== -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="ft-grid">
+      <div>
+        <h4>Trader Shelf · 交易者的工具架</h4>
+        <p style="margin:0 0 8px">一个页面看全 A股、美股、港股与加密货币的大盘云图热力图。热力图按市值排布、颜色代表涨跌幅，每个交易日收盘后自动生成复盘与归档，支持回看任意历史交易日。本站为独立工具站，与东方财富、同花顺等无关联。</p>
+        <p style="margin:0">姊妹项目：<a href="https://calm.tradershelf.com" rel="nofollow">停一刻 · 交易者休息小站</a></p>
+      </div>
+      <div>
+        <h4>市场云图</h4>
+        <ul>
+          <li><a href="index.html">A股大盘云图</a></li>
+          <li><a href="us.html">美股大盘云图</a></li>
+          <li><a href="#">港股大盘云图</a></li>
+          <li><a href="#">Crypto 热力图</a></li>
+          <li><a href="#">大盘星图</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>板块精选</h4>
+        <ul>
+          <li><a href="sector-semiconductor.html">半导体</a></li>
+          <li><a href="#">人工智能</a></li>
+          <li><a href="#">CPO光模块</a></li>
+          <li><a href="#">券商</a></li>
+          <li><a href="#">红利低波</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>站点</h4>
+        <ul>
+          <li><a href="#">关于本站</a></li>
+          <li><a href="#">隐私政策</a></li>
+          <li><a href="#">免责声明</a></li>
+          <li><a href="#">联系我们</a></li>
+          <li><a href="#">每日归档</a></li>
+          <li><a href="#">网站地图</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="disclaimer">
+      免责声明：本站行情数据来自公开接口整理，可能存在延迟或误差，所有内容仅供参考，不构成任何投资建议。股市有风险，投资需谨慎。加密货币相关内容不面向美国及受限地区居民，亦不构成税务或法律建议。
+    </div>
+    <div class="ft-bottom">
+      <span>© 2026 tradershelf.com</span>
+      <span>Trader Shelf · 交易者的工具架</span>
+    </div>
+  </div>
+</footer>
+</div><!-- /.main -->
+</div><!-- /.shell -->
+<script>
+(function () {
+  var b = document.querySelector('.burger'), m = document.querySelector('.side-mask');
+  if (!b) return;
+  b.addEventListener('click', function () { document.body.classList.toggle('side-open'); });
+  m.addEventListener('click', function () { document.body.classList.remove('side-open'); });
+})();
+</script>
+
+</body>
+</html>

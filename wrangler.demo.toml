@@ -1,0 +1,12 @@
+# Trader Shelf · 设计演示站（demo/ 静态母版，与生产站分开部署）
+# 部署：npx wrangler deploy -c wrangler.demo.toml
+name = "tradershelf-demo"
+compatibility_date = "2026-10-01"
+
+routes = [
+  { pattern = "demo.tradershelf.com", custom_domain = true }
+]
+
+[assets]
+directory = "./demo"
+not_found_handling = "404-page"

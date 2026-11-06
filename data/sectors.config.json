@@ -1,0 +1,14 @@
+[
+  { "slug": "semiconductor", "name": "半导体", "display": "半导体板块", "kw": "A股芯片股", "related": ["ai", "cpo", "robotics"] },
+  { "slug": "ai", "name": "人工智能", "display": "人工智能板块", "kw": "AI概念股", "related": ["semiconductor", "cpo", "robotics"] },
+  { "slug": "cpo", "name": "CPO概念", "display": "CPO光模块板块", "kw": "光通信概念股", "related": ["semiconductor", "ai", "robotics"] },
+  { "slug": "defense", "name": "军工", "display": "军工板块", "kw": "国防军工股", "related": ["semiconductor", "low-altitude"] },
+  { "slug": "banks", "name": "银行", "display": "银行板块", "kw": "银行股", "related": ["brokers", "liquor"] },
+  { "slug": "brokers", "name": "证券Ⅱ", "display": "券商板块", "kw": "证券股", "related": ["banks", "ai"] },
+  { "slug": "liquor", "name": "白酒", "display": "白酒板块", "kw": "白酒股", "related": ["banks", "battery"] },
+  { "slug": "solar", "name": "光伏设备", "display": "光伏板块", "kw": "光伏设备股", "related": ["battery", "auto"] },
+  { "slug": "battery", "name": "电池", "display": "电池板块", "kw": "锂电池股", "related": ["solar", "auto"] },
+  { "slug": "auto", "name": "汽车整车", "display": "汽车整车板块", "kw": "整车股", "related": ["battery", "robotics"] },
+  { "slug": "robotics", "name": "机器人概念", "display": "机器人板块", "kw": "机器人概念股", "related": ["ai", "semiconductor", "auto"] },
+  { "slug": "low-altitude", "name": "低空经济", "display": "低空经济板块", "kw": "低空经济概念股", "related": ["defense", "ai"] }
+]

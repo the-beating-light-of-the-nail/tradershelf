@@ -1,0 +1,4 @@
+# 演示站防收录：占位内容 noindex，避免污染将来生产站（tradershelf.com 根域）的 SEO
+# 生产站上线后此文件不随迁（demo/ 仅作设计母版）
+/*
+  X-Robots-Tag: noindex, nofollow

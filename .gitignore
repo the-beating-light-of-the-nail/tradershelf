@@ -1,0 +1,8 @@
+node_modules/
+.nuxt/
+.output/
+dist/
+.wrangler/
+.tmp-*
+*.log
+.DS_Store

@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!--
+  ██ Trader Shelf · 市场级长尾页设计演示 —— 美股大盘云图（2026-11-06）
+  · 纯静态零依赖，数据全部为占位
+  · 本页演示：面包屑 / 关键词 H1 / 300 字自动文案区（Programmatic SEO）/
+    配色翻转（美股绿涨红跌）/ 指数子视图 Tab / 权重股 <table> /
+    FAQ + FAQPage JSON-LD / BreadcrumbList / 相关页内链 / 广告位 A·C·D·E
+  · 同一模板复用于：/hk/ /crypto/ /index/* 与 /archive/*（归档页另加前后日导航）
+-->
+<title>美股大盘云图_标普500纳斯达克100实时热力图 - Trader Shelf</title>
+<meta name="description" content="美股大盘云图中文版：标普500、纳斯达克100、道琼斯实时热力图，按市值排布、绿涨红跌国际配色，附当日权重股涨跌榜与每日中文复盘归档，免费无需注册。">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://tradershelf.com/us/">
+<meta name="theme-color" content="#0c1017">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Trader Shelf">
+<meta property="og:title" content="美股大盘云图_标普500纳斯达克100实时热力图 - Trader Shelf">
+<meta property="og:description" content="美股热力图中文版，按市值排布、绿涨红跌，附权重股榜与每日复盘归档。">
+<meta property="og:url" content="https://tradershelf.com/us/">
+<meta property="og:image" content="https://tradershelf.com/og-us.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c1017'/%3E%3Crect x='6' y='8' width='20' height='4' rx='1.5' fill='%23f0b64a'/%3E%3Crect x='6' y='14' width='12' height='4' rx='1.5' fill='%23d9303e'/%3E%3Crect x='6' y='20' width='20' height='4' rx='1.5' fill='%230e9f77'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .demo-note{margin:14px 0;padding:9px 14px;border-left:3px solid var(--gold);background:#fdf6e7;color:#8a6a1f;border-radius:0 8px 8px 0;font-size:13px;line-height:1.7}
+  .tm-stage .sm{font-size:13px}
+  .hero-head h2{font-size:16px;font-weight:600;color:#e8eef6;letter-spacing:.02em;margin:0}
+  .tabs.sub .tab{padding:4px 12px;font-size:12.5px}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+{"@type":"ListItem","position":1,"name":"Trader Shelf","item":"https://tradershelf.com/"},
+{"@type":"ListItem","position":2,"name":"美股大盘云图","item":"https://tradershelf.com/us/"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"美股热力图为什么绿色代表上涨？","acceptedAnswer":{"@type":"Answer","text":"国际市场惯例为绿涨红跌，与A股的红涨绿跌相反。本站美股、港股、Crypto页面自动切换为国际配色，并在图例中标注，避免误读。"}},
+{"@type":"Question","name":"美股大盘云图的数据是实时的吗？","acceptedAnswer":{"@type":"Answer","text":"盘中通过行情接口自动刷新（约10秒级快照），收盘后当日云图自动固化到归档页，可随时回看任意交易日的历史热力图。"}},
+{"@type":"Question","name":"支持哪些美股指数视图？","acceptedAnswer":{"@type":"Answer","text":"支持标普500、纳斯达克100、道琼斯工业指数与全市场四个视图，按市值排布，颜色代表当日涨跌幅。"}},
+{"@type":"Question","name":"与 Finviz 等英文热力图有什么区别？","acceptedAnswer":{"@type":"Answer","text":"中文界面与中文公司译名，附带每个交易日的中文复盘归档与板块资金解读，免费使用无需注册。"}}]}
+</script>
+</head>
+<body>
+
+<!-- ======== 左侧导航工作台（桌面固定左栏，移动端收抽屉） ======== -->
+<div class="shell">
+<aside class="sidebar">
+  <a class="logo side-logo" href="index.html">
+    <span class="logo-mark"><i></i><i></i><i></i><i></i></span>
+    Trader<em>Shelf</em>
+  </a>
+  <nav class="side-nav" aria-label="主导航">
+    <div class="side-group">市场热力图</div>
+    <a class="side-link" href="index.html">A股大盘云图</a>
+    <a class="side-link on" href="us.html">美股大盘云图</a>
+    <a class="side-link" href="#">港股大盘云图</a>
+    <a class="side-link" href="#">Crypto 热力图</a>
+    <a class="side-link" href="#">大盘星图</a>
+    <div class="side-group">板块热力图</div>
+    <a class="side-link" href="sector-semiconductor.html">半导体</a>
+    <a class="side-link" href="#">人工智能</a>
+    <a class="side-link" href="#">CPO光模块</a>
+    <a class="side-link" href="#">券商</a>
+    <a class="side-link" href="#">白酒</a>
+    <div class="side-group">工具与归档</div>
+    <a class="side-link" href="#">每日归档</a>
+    <a class="side-link" href="#">恐慌贪婪指数</a>
+    <a class="side-link" href="#">网格计算器</a>
+    <a class="side-link" href="#">复利计算器</a>
+  </nav>
+  <div class="side-foot">
+    <button class="nav-cta side-fav" type="button" title="Ctrl+D 收藏本站">★ 收藏看盘</button>
+    <div class="side-links-row"><a href="#">关于</a><a href="#">隐私</a><a href="#">免责</a><a href="#">联系</a></div>
+  </div>
+</aside>
+<div class="side-mask" aria-hidden="true"></div>
+<div class="main">
+  <div class="mobilebar">
+    <button class="burger" type="button" aria-label="打开导航">☰</button>
+    <a class="logo" href="index.html"><span class="logo-mark"><i></i><i></i><i></i><i></i></span> Trader<em>Shelf</em></a>
+  </div>
+
+<!-- ======== 长尾页头部：面包屑 + 关键词 H1 + 自动文案（信息增量层） ======== -->
+<div class="wrap">
+  <nav class="crumb" aria-label="面包屑">
+    <ol>
+      <li><a href="index.html">首页</a></li>
+      <li>市场云图</li>
+      <li><strong>美股大盘云图</strong></li>
+    </ol>
+  </nav>
+  <div class="page-head">
+    <h1>美股大盘云图 · 标普500 / 纳斯达克100 实时热力图</h1>
+    <p class="sub">按市值排布的美股热力图（中文版），面积越大权重越高，颜色代表当日涨跌幅——<b class="pos-intl">绿涨红跌（国际配色）</b>，与 A 股页自动区分。</p>
+    <div class="meta-line">
+      <span>更新：2026-11-06 美东收盘（演示数据）</span>
+      <span>盘中每 10 秒自动刷新</span>
+      <span>数据来源：公开行情接口</span>
+      <span>免费 · 无需注册</span>
+    </div>
+  </div>
+
+  <p class="demo-note">⚙ 演示说明：下面这段介绍在生产环境由收盘数据管线按「模板 + 当日行情」自动重写（约 300 字）——Title/H1 固定含核心关键词，正文数字每天变化，保证爬虫每次抓到新鲜原创文本。</p>
+  <p class="lede">2026年11月6日（美东时间）美股收盘，<b>标普500指数上涨 0.28% 报 6,214.55 点</b>，纳斯达克综合指数上涨 0.46%，道琼斯工业指数下跌 0.12%。当日科技板块领涨：英伟达上涨 3.42%、博通上涨 4.82%，半导体产业链继续消化 AI 需求利好；特斯拉下跌 4.35%，拖累可选消费板块。上方云图按市值排布标普500成分股，面积越大代表公司权重越高。本页盘中每 10 秒自动刷新，收盘后自动固化存档，您可在<a href="#">每日归档</a>中回看任意交易日的历史热力图，也可切换至<a href="index.html">A股大盘云图</a>或<a href="#">港股大盘云图</a>对照全球市场。</p>
+</div>
+
+<!-- ======== 热力图工具区（深色） ======== -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-head">
+      <h2>美股大盘云图 · 标普500</h2>
+      <span class="upd">2026-11-06 美东收盘 · <b>演示数据</b></span>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="市场切换">
+      <a class="tab" href="index.html">🇨🇳 A股全景</a>
+      <span class="tab on" aria-current="true">🇺🇸 美股</span>
+      <a class="tab" href="#">🇭🇰 港股</a>
+      <a class="tab" href="#">₿ Crypto</a>
+    </div>
+    <div class="tabs sub" aria-label="指数视图">
+      <span class="tab on" aria-current="true">标普500</span>
+      <a class="tab" href="#">纳斯达克100</a>
+      <a class="tab" href="#">道琼斯</a>
+      <a class="tab" href="#">全市场</a>
+    </div>
+
+    <div class="tm-toolbar">
+      <span>标普500 · 503 只成分股</span>
+      <span>面积 = 公司市值</span>
+      <span class="legend lg-intl"><span>红跌</span><i class="lg-bar"></i><span>绿涨</span></span>
+      <span class="num">-5% ~ +5%</span>
+      <button class="tm-full" type="button">⛶ 全屏盯盘</button>
+    </div>
+
+    <div class="tm-stage" aria-label="美股大盘云图热力图（演示）">
+      <div class="tm-cell" style="left:0;top:0;width:30%;height:34%;background:#93423c" title="苹果 AAPL -0.62%"><span class="tm-name">苹果 AAPL</span><span class="tm-chg">-0.62%</span></div>
+      <div class="tm-cell" style="left:30%;top:0;width:34%;height:34%;background:#23945f" title="微软 MSFT +1.12%"><span class="tm-name">微软 MSFT</span><span class="tm-chg">+1.12%</span></div>
+      <div class="tm-cell" style="left:64%;top:0;width:36%;height:34%;background:#0f8a52" title="英伟达 NVDA +3.42%"><span class="tm-name">英伟达 NVDA</span><span class="tm-chg">+3.42%</span></div>
+
+      <div class="tm-cell" style="left:0;top:34%;width:16%;height:28%;background:#3f7a5c" title="谷歌 GOOGL +0.83%"><span class="tm-name">谷歌</span><span class="tm-chg">+0.83%</span></div>
+      <div class="tm-cell" style="left:16%;top:34%;width:17%;height:28%;background:#c04a42" title="亚马逊 AMZN -1.28%"><span class="tm-name">亚马逊</span><span class="tm-chg">-1.28%</span></div>
+      <div class="tm-cell" style="left:33%;top:34%;width:17%;height:28%;background:#0f8a52" title="Meta +2.14%"><span class="tm-name">Meta</span><span class="tm-chg">+2.14%</span></div>
+      <div class="tm-cell" style="left:50%;top:34%;width:17%;height:28%;background:#067a45" title="博通 AVGO +4.82%"><span class="tm-name">博通</span><span class="tm-chg">+4.82%</span></div>
+      <div class="tm-cell" style="left:67%;top:34%;width:17%;height:28%;background:#e52d2d" title="特斯拉 TSLA -4.35%"><span class="tm-name">特斯拉</span><span class="tm-chg">-4.35%</span></div>
+      <div class="tm-cell" style="left:84%;top:34%;width:16%;height:28%;background:#3f7a5c" title="伯克希尔 BRK.B +0.31%"><span class="tm-name">伯克希尔</span><span class="tm-chg">+0.31%</span></div>
+
+      <div class="tm-cell sm" style="left:0;top:62%;width:16%;height:20%;background:#0f8a52" title="台积电 TSM +2.90%"><span class="tm-name">台积电</span><span class="tm-chg">+2.90%</span></div>
+      <div class="tm-cell sm" style="left:16%;top:62%;width:17%;height:20%;background:#23945f" title="埃克森美孚 XOM +1.67%"><span class="tm-name">埃克森美孚</span><span class="tm-chg">+1.67%</span></div>
+      <div class="tm-cell sm" style="left:33%;top:62%;width:17%;height:20%;background:#d63a33" title="联合健康 UNH -2.86%"><span class="tm-name">联合健康</span><span class="tm-chg">-2.86%</span></div>
+      <div class="tm-cell sm" style="left:50%;top:62%;width:16%;height:20%;background:#3f7a5c" title="摩根大通 JPM +0.94%"><span class="tm-name">摩根大通</span><span class="tm-chg">+0.94%</span></div>
+      <div class="tm-cell sm" style="left:66%;top:62%;width:17%;height:20%;background:#93423c" title="Visa -0.41%"><span class="tm-name">Visa</span><span class="tm-chg">-0.41%</span></div>
+      <div class="tm-cell sm" style="left:83%;top:62%;width:17%;height:20%;background:#23945f" title="礼来 LLY +1.41%"><span class="tm-name">礼来</span><span class="tm-chg">+1.41%</span></div>
+
+      <div class="tm-cell sm" style="left:0;top:82%;width:13%;height:18%;background:#3f7a5c" title="沃尔玛 WMT +0.72%"><span class="tm-name">沃尔玛</span><span class="tm-chg">+0.72%</span></div>
+      <div class="tm-cell sm" style="left:13%;top:82%;width:12%;height:18%;background:#23945f" title="甲骨文 ORCL +1.05%"><span class="tm-name">甲骨文</span><span class="tm-chg">+1.05%</span></div>
+      <div class="tm-cell sm" style="left:25%;top:82%;width:12%;height:18%;background:#c04a42" title="奈飞 NFLX -1.90%"><span class="tm-name">奈飞</span><span class="tm-chg">-1.90%</span></div>
+      <div class="tm-cell sm" style="left:37%;top:82%;width:13%;height:18%;background:#93423c" title="强生 JNJ -0.53%"><span class="tm-name">强生</span><span class="tm-chg">-0.53%</span></div>
+      <div class="tm-cell sm" style="left:50%;top:82%;width:12%;height:18%;background:#0f8a52" title="AMD +3.10%"><span class="tm-name">AMD</span><span class="tm-chg">+3.10%</span></div>
+      <div class="tm-cell sm" style="left:62%;top:82%;width:13%;height:18%;background:#3f7a5c" title="万事达 MA +0.60%"><span class="tm-name">万事达</span><span class="tm-chg">+0.60%</span></div>
+      <div class="tm-cell sm" style="left:75%;top:82%;width:12%;height:18%;background:#c04a42" title="迪士尼 DIS -1.20%"><span class="tm-name">迪士尼</span><span class="tm-chg">-1.20%</span></div>
+      <div class="tm-cell sm" style="left:87%;top:82%;width:13%;height:18%;background:#3f7a5c" title="开市客 COST +0.90%"><span class="tm-name">开市客</span><span class="tm-chg">+0.90%</span></div>
+    </div>
+
+    <p class="hero-foot">美股/港股/Crypto 页面采用国际配色（<b>绿涨红跌</b>），与 A 股习惯相反，图例已标注。数据来自公开行情接口，可能存在延迟，仅供参考，不构成投资建议。</p>
+  </div>
+</section>
+
+<!-- 广告位 A：首屏下方横幅 -->
+<aside class="wrap">
+  <div class="ad-slot ad-banner" aria-label="广告位">
+    <span class="t1">广告位 A · 响应式横幅</span>
+    <span class="t2">AdSense Display 预留（970×90 / 320×100）· 与全屏按钮保持距离，防误点</span>
+  </div>
+</aside>
+
+<!-- ======== 内容区 ======== -->
+<div class="light-zone">
+  <div class="wrap">
+    <div class="layout">
+
+      <main>
+        <section class="sec">
+          <h2>标普500 市值权重前 12 成分股</h2>
+          <p class="demo-note">⚙ 演示说明：爬虫最爱的一层——真实 <code>&lt;table&gt;</code> 文本数据，生产环境由当日行情自动生成行；「板块」列内链到美股板块长尾页。</p>
+          <div class="tbl-wrap">
+            <table class="data">
+              <caption>2026-11-06 美东收盘 · 市值单位亿美元 · 演示数据</caption>
+              <thead>
+                <tr><th>代码</th><th>公司</th><th>涨跌幅</th><th>市值</th><th>指数权重</th><th>板块</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>AAPL</td><td>苹果</td><td class="neg-intl">-0.62%</td><td class="num">34,150</td><td class="num">7.02%</td><td><a href="#">科技</a></td></tr>
+                <tr><td>MSFT</td><td>微软</td><td class="pos-intl">+1.12%</td><td class="num">31,820</td><td class="num">6.58%</td><td><a href="#">科技</a></td></tr>
+                <tr><td>NVDA</td><td>英伟达</td><td class="pos-intl">+3.42%</td><td class="num">30,540</td><td class="num">6.31%</td><td><a href="#">半导体</a></td></tr>
+                <tr><td>AMZN</td><td>亚马逊</td><td class="neg-intl">-1.28%</td><td class="num">22,100</td><td class="num">4.61%</td><td><a href="#">电商零售</a></td></tr>
+                <tr><td>GOOGL</td><td>谷歌</td><td class="pos-intl">+0.83%</td><td class="num">19,870</td><td class="num">4.12%</td><td><a href="#">科技</a></td></tr>
+                <tr><td>META</td><td>Meta</td><td class="pos-intl">+2.14%</td><td class="num">14,320</td><td class="num">2.98%</td><td><a href="#">科技</a></td></tr>
+                <tr><td>AVGO</td><td>博通</td><td class="pos-intl">+4.82%</td><td class="num">11,240</td><td class="num">2.35%</td><td><a href="#">半导体</a></td></tr>
+                <tr><td>TSLA</td><td>特斯拉</td><td class="neg-intl">-4.35%</td><td class="num">9,120</td><td class="num">1.90%</td><td><a href="#">汽车</a></td></tr>
+                <tr><td>BRK.B</td><td>伯克希尔</td><td class="pos-intl">+0.31%</td><td class="num">9,050</td><td class="num">1.88%</td><td><a href="#">金融</a></td></tr>
+                <tr><td>JPM</td><td>摩根大通</td><td class="pos-intl">+0.94%</td><td class="num">6,890</td><td class="num">1.43%</td><td><a href="#">金融</a></td></tr>
+                <tr><td>LLY</td><td>礼来</td><td class="pos-intl">+1.41%</td><td class="num">6,720</td><td class="num">1.39%</td><td><a href="#">医药</a></td></tr>
+                <tr><td>V</td><td>Visa</td><td class="neg-intl">-0.41%</td><td class="num">6,210</td><td class="num">1.29%</td><td><a href="#">金融</a></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 广告位 C：长尾页文中（内容中间，长尾页主力位） -->
+        <div class="ad-slot ad-inread" aria-label="广告位">
+          <span class="t1">广告位 C · 文中横幅</span>
+          <span class="t2">in-article 预留 · 仅内容页启用，工具交互区不放广告</span>
+        </div>
+
+        <section class="sec faq">
+          <h2>美股热力图常见问题</h2>
+          <details open>
+            <summary>美股热力图为什么绿色代表上涨？</summary>
+            <div class="a">国际市场惯例为绿涨红跌，与 A 股的红涨绿跌相反。本站美股、港股、Crypto 页面自动切换为国际配色，并在图例中标注，避免误读。</div>
+          </details>
+          <details>
+            <summary>美股大盘云图的数据是实时的吗？</summary>
+            <div class="a">盘中通过行情接口自动刷新（约 10 秒级快照），收盘后当日云图自动固化到归档页，可随时回看任意交易日的历史热力图。</div>
+          </details>
+          <details>
+            <summary>支持哪些美股指数视图？</summary>
+            <div class="a">支持标普500、纳斯达克100、道琼斯工业指数与全市场四个视图，按市值排布，颜色代表当日涨跌幅。</div>
+          </details>
+          <details>
+            <summary>与 Finviz 等英文热力图有什么区别？</summary>
+            <div class="a">中文界面与中文公司译名，附带每个交易日的中文复盘归档与板块资金解读，免费使用无需注册。</div>
+          </details>
+        </section>
+
+        <section class="sec">
+          <h2>相关页面</h2>
+          <div class="related-grid">
+            <a class="rel-card" href="index.html"><div class="t">A股大盘云图</div><div class="d">沪深两市实时热力图（红涨绿跌）</div></a>
+            <a class="rel-card" href="#"><div class="t">港股大盘云图</div><div class="d">恒生指数与恒生科技成分股云图</div></a>
+            <a class="rel-card" href="#"><div class="t">纳斯达克100云图</div><div class="d">科技七巨头权重更高的一屏视图</div></a>
+            <a class="rel-card" href="#"><div class="t">昨日美股复盘归档</div><div class="d">任意交易日历史云图与板块涨跌</div></a>
+          </div>
+        </section>
+      </main>
+
+      <!-- 侧栏 -->
+      <div class="aside-col">
+        <div class="ad-slot ad-rect ad-dark" aria-label="广告位">
+          <span class="t1">广告位 D · 侧栏矩形</span>
+          <span class="t2">300×250 预留 · 跟随滚动</span>
+        </div>
+
+        <div class="card">
+          <h2>美股核心指标</h2>
+          <div class="kicker"><span>2026-11-06 收盘 · 演示数据 · 绿涨红跌</span></div>
+          <div class="idx-grid">
+            <div class="idx"><div class="n">标普500</div><div class="v num">6,214.55</div><div class="c pos-intl num">+0.28%</div></div>
+            <div class="idx"><div class="n">纳斯达克</div><div class="v num">19,742.88</div><div class="c pos-intl num">+0.46%</div></div>
+            <div class="idx"><div class="n">道琼斯</div><div class="v num">44,102.30</div><div class="c neg-intl num">-0.12%</div></div>
+            <div class="idx"><div class="n">罗素2000</div><div class="v num">2,284.71</div><div class="c pos-intl num">+0.65%</div></div>
+            <div class="idx"><div class="n">VIX 恐慌指数</div><div class="v num">14.82</div><div class="c neg-intl num">-3.10%</div></div>
+            <div class="idx"><div class="n">美元指数</div><div class="v num">104.32</div><div class="c pos-intl num">+0.08%</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>当日要点</h2>
+          <ul class="brief-list small">
+            <li><span class="tag-mkt">[盘面]</span>三大指数分化，纳指领涨，价值股轮动放缓。</li>
+            <li><span class="tag-mkt">[资金]</span>半导体板块净流入居首，科技七巨头五涨二跌。</li>
+            <li><span class="tag-mkt">[关注]</span>下周 CPI 数据公布前，市场观望情绪升温。</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>换个姿势看</h2>
+          <div class="tool-grid">
+            <a class="tool-item" href="index.html"><div class="t">A股大盘云图</div><div class="d">红涨绿跌中文配色</div></a>
+            <a class="tool-item" href="#"><div class="t">美股板块热力图</div><div class="d">按 GICS 行业分组下钻</div></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 广告位 E：底部 -->
+    <div class="ad-slot ad-banner" aria-label="广告位" style="margin-bottom:0">
+      <span class="t1">广告位 E · 底部横幅</span>
+      <span class="t2">AdSense Display 预留</span>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 页脚 ======== -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="ft-grid">
+      <div>
+        <h4>Trader Shelf · 交易者的工具架</h4>
+        <p style="margin:0 0 8px">一个页面看全 A股、美股、港股与加密货币的大盘云图热力图。热力图按市值排布、颜色代表涨跌幅，每个交易日收盘后自动生成复盘与归档。本站为独立工具站，与东方财富、Finviz、TradingView 等无关联。</p>
+        <p style="margin:0">姊妹项目：<a href="https://calm.tradershelf.com" rel="nofollow">停一刻 · 交易者休息小站</a></p>
+      </div>
+      <div>
+        <h4>美股相关</h4>
+        <ul>
+          <li><a href="us.html">美股大盘云图</a></li>
+          <li><a href="#">纳斯达克100云图</a></li>
+          <li><a href="#">道琼斯云图</a></li>
+          <li><a href="#">美股板块热力图</a></li>
+          <li><a href="#">美股每日归档</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>其他市场</h4>
+        <ul>
+          <li><a href="index.html">A股大盘云图</a></li>
+          <li><a href="#">港股大盘云图</a></li>
+          <li><a href="#">Crypto 热力图</a></li>
+          <li><a href="sector-semiconductor.html">A股板块热力图</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>站点</h4>
+        <ul>
+          <li><a href="#">关于本站</a></li>
+          <li><a href="#">隐私政策</a></li>
+          <li><a href="#">免责声明</a></li>
+          <li><a href="#">联系我们</a></li>
+          <li><a href="#">每日归档</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="disclaimer">
+      免责声明：本站行情数据来自公开接口整理，可能存在延迟或误差，所有内容仅供参考，不构成任何投资建议。证券与加密货币投资有风险，决策需谨慎。
+    </div>
+    <div class="ft-bottom">
+      <span>© 2026 tradershelf.com</span>
+      <span>Trader Shelf · 交易者的工具架</span>
+    </div>
+  </div>
+</footer>
+</div><!-- /.main -->
+</div><!-- /.shell -->
+<script>
+(function () {
+  var b = document.querySelector('.burger'), m = document.querySelector('.side-mask');
+  if (!b) return;
+  b.addEventListener('click', function () { document.body.classList.toggle('side-open'); });
+  m.addEventListener('click', function () { document.body.classList.remove('side-open'); });
+})();
+</script>
+
+</body>
+</html>
