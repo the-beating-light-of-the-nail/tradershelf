@@ -12,7 +12,11 @@ routes = [
 
 [assets]
 directory = "./.output/public"
-not_found_handling = "404-page"
+# 显式绑定：worker 里 env.ASSETS 才能兜住未命中路径，回落到自定义 404 页（否则只有纯文本 404）
+binding = "ASSETS"
+# 未命中资产的请求交给 worker 兜（worker 内回 404.html 内容 + 404 状态码）；
+# 若设成 "404-page"，Cloudflare 会 307 到 /404 且返回 200（软 404），对 SEO 不利
+not_found_handling = "none"
 # 目录式路由（/crypto、/xingtu）默认会 307 到带斜杠版本，白丢一跳；
 # 与 canonical / sitemap 的无斜杠形式对齐，统一去掉尾部斜杠
 html_handling = "drop-trailing-slash"

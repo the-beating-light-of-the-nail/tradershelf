@@ -75,12 +75,24 @@ const SOURCES = [
   ['coincap', fromCoinCap],
 ]
 
-/** 兜底静态资产：命中返回原响应，未命中回落到站内 404 页（而非白屏文本） */
+/** 兜底静态资产：命中返回原响应，未命中回落到站内 404 页（而非白屏文本），并保持 404 状态码 */
 async function serveAsset(request, env, url) {
-  if (env && env.ASSETS) {
-    const res = await env.ASSETS.fetch(request)
-    if (res.status !== 404) return res
-    return env.ASSETS.fetch(new Request(new URL('/404.html', url).toString(), request))
+  if (!env || !env.ASSETS) return new Response('Not Found', { status: 404 })
+  const res = await env.ASSETS.fetch(request)
+  if (res.status !== 404) return res
+
+  // 资产层对 /404.html 可能先回 307（html_handling 去斜杠），逐个候选 + 跟随一次跳转
+  for (const p of ['/404', '/404.html']) {
+    let r = await env.ASSETS.fetch(new Request(new URL(p, url).toString(), { headers: request.headers }))
+    if (r.status >= 300 && r.status < 400) {
+      const loc = r.headers.get('location')
+      if (loc) r = await env.ASSETS.fetch(new Request(new URL(loc, url).toString(), { headers: request.headers }))
+    }
+    if (r.status === 200) {
+      const headers = new Headers(r.headers)
+      headers.set('content-type', 'text/html; charset=utf-8')
+      return new Response(r.body, { status: 404, headers })
+    }
   }
   return new Response('Not Found', { status: 404 })
 }

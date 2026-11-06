@@ -144,6 +144,7 @@ tradershelf/
 **本地一条命令**：`npm run deploy` = 抓数据 → `nuxt generate` → `wrangler deploy` → IndexNow 推送。
 
 **路由形态**：`[assets] html_handling = "drop-trailing-slash"`，`/crypto` 直出 200（不再 307 到 `/crypto/`），与 canonical / sitemap 的无斜杠形式一致。
+**404 处理**：`not_found_handling = "none"` + `binding = "ASSETS"`，未命中路径由 worker 渲染站内 404 页、**保持 404 状态码**（若用 `"404-page"`，Cloudflare 会 307 到 `/404` 且返回 200，形成软 404）。
 
 ## 8. 风险与合规
 
