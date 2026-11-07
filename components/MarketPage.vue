@@ -27,7 +27,10 @@
       <div class="wrap">
         <div class="hero-head">
           <div class="h1">{{ m.h1 }}</div>
-          <span class="upd">{{ tradeDate }}{{ m.closeSuffix }}</span>
+          <div class="hero-head-r">
+            <span class="upd">{{ tradeDate }}{{ m.closeSuffix }}</span>
+            <a class="cta-app" :href="appHref" title="进入实时完整版看盘工具（本站 /app）">⚡ 实时完整版看盘 →</a>
+          </div>
         </div>
         <MarketTabs />
         <div v-if="m.subs" class="tabs sub" aria-label="指数视图">
@@ -45,6 +48,7 @@
           :aria-label="m.h1"
           :foot="m.foot"
           :ccy="m.ccy || 'cny'"
+          :app-link="appLink"
         />
       </div>
     </section>
@@ -84,6 +88,7 @@
               <h2>相关页面</h2>
               <div class="related-grid">
                 <NuxtLink class="rel-card" to="/"><div class="t">A股大盘云图</div><div class="d">沪深两市实时热力图（红涨绿跌）</div></NuxtLink>
+                <a class="rel-card" :href="appHref"><div class="t">⚡ 实时完整版看盘</div><div class="d">全市场云图 · 搜索个股 · 板块下钻（8 秒刷新）</div></a>
                 <NuxtLink v-if="m.key !== 'us'" class="rel-card" to="/us"><div class="t">美股大盘云图</div><div class="d">标普500/纳斯达克权重股云图</div></NuxtLink>
                 <NuxtLink v-if="m.key !== 'hk'" class="rel-card" to="/hk"><div class="t">港股大盘云图</div><div class="d">恒生指数与科技股成分云图</div></NuxtLink>
                 <NuxtLink v-if="m.key !== 'crypto'" class="rel-card" to="/crypto"><div class="t">Crypto 热力图</div><div class="d">BTC/以太坊全网市值云图 24h</div></NuxtLink>
@@ -123,6 +128,18 @@
 import { tradeDate, stale, fp, fmtPrice, fmtCap, clsIntl } from '~/utils/data'
 
 const props = defineProps<{ m: any; review: { lede: string; briefs: string[] } }>()
+
+/* 引流深链：/app 完整工具（本站）。market 映射：a→A_ALL 实时全A、hk→港股视图；
+   us/crypto 工具层暂无对应市场，CTA 落默认视图、板块 tile 保留本页下钻 */
+const route = useRoute()
+const from = encodeURIComponent(route.path)
+const APP_MARKET: Record<string, string | null> = { a: 'a', hk: 'hk', us: null, crypto: null }
+const appLink = computed(() => {
+  const mk = APP_MARKET[props.m.key]
+  return mk ? `/app?market=${mk}&from=${from}` : null
+})
+const appHref = computed(() => appLink.value || `/app?from=${from}`)
+
 const tagOf = (b: string) => b.slice(0, b.indexOf(']') + 1)
 const stripTag = (b: string) => b.replace(/^\[[^\]]+\]/, '')
 useSeoMeta(props.m.seo)

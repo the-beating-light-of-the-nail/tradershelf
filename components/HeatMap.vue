@@ -6,7 +6,7 @@
       <span class="legend" :class="{ 'lg-intl': palette !== 'cn' }">
         <span>{{ palette === 'cn' ? '绿跌' : '红跌' }}</span><i class="lg-bar"></i><span>{{ palette === 'cn' ? '红涨' : '绿涨' }}</span>
       </span>
-      <span class="tm-hint">悬停看详情 · 点击板块下钻 · 滚轮缩放</span>
+      <span class="tm-hint">{{ appLink ? '悬停看详情 · 点击板块进入实时完整版' : '悬停看详情 · 点击板块下钻 · 滚轮缩放' }}</span>
       <span v-if="status" class="live-dot" :class="status.open ? 'is-open' : 'is-off'" :title="status.hint"><i></i>{{ badgeText }}</span>
       <button class="tm-full" type="button" title="下载当前云图 PNG" @click="shot">📷 截图</button>
       <button class="tm-full" type="button" @click="fullscreen">⛶ 全屏盯盘</button>
@@ -57,8 +57,9 @@ const props = withDefaults(
     foot?: string
     ariaLabel?: string
     ccy?: 'cny' | 'usd' | 'hkd'
+    appLink?: string | null   // 传入即启用引流：板块 tile 点击 → /app 完整工具深链（自动拼 &focus=板块名）
   }>(),
-  { palette: 'cn', marketKey: '', liveFs: null, liveUrl: null, liveInterval: 60000, sizeLabel: '面积 = 流通市值', ccy: 'cny' },
+  { palette: 'cn', marketKey: '', liveFs: null, liveUrl: null, liveInterval: 60000, sizeLabel: '面积 = 流通市值', ccy: 'cny', appLink: null },
 )
 
 /* ---------- 个股详情面板状态 ---------- */
@@ -121,7 +122,8 @@ function buildOption() {
         const d = p.data || {}
         if (d.children) {
           const up = d.children.filter((c: any) => c.pct > 0).length
-          return `<b>${p.name}</b> · 成分 ${d.children.length} 只<br/>上涨 ${up} · 下跌 ${d.children.length - up}<br/><span style="color:#8b95a1">点击下钻查看个股</span>`
+          const action = props.appLink ? '点击进入实时完整版' : '点击下钻查看个股'
+          return `<b>${p.name}</b> · 成分 ${d.children.length} 只<br/>上涨 ${up} · 下跌 ${d.children.length - up}<br/><span style="color:#8b95a1">${action}</span>`
         }
         const up = props.palette === 'cn' ? '#ff7b72' : '#3fd69b'
         const dn = props.palette === 'cn' ? '#3fd69b' : '#ff7b72'
@@ -192,11 +194,16 @@ async function initChart() {
     chart = init(cel)
     chart.setOption(buildOption())
     chartReady.value = true
-    // 点击接管：板块 → 下钻（面包屑返回）；个股 → 详情面板
+    // 点击接管：板块 → /app 完整工具深链（预览即诱饵）；个股 → 详情面板
     chart.on('click', (p: any) => {
       const d = p.data || {}
       if (d.children && d.children.length) {
-        chart.dispatchAction({ type: 'treemapZoomToNode', seriesIndex: 0, name: p.name })
+        if (props.appLink) {
+          const sep = props.appLink.includes('?') ? '&' : '?'
+          window.location.href = `${props.appLink}${sep}focus=${encodeURIComponent(p.name)}`
+        } else {
+          chart.dispatchAction({ type: 'treemapZoomToNode', seriesIndex: 0, name: p.name })
+        }
       } else if (d.code) {
         openPanel(d.code)
       }

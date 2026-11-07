@@ -131,6 +131,17 @@ p { margin: 0 0 12px; }
 .hero-head h1, .hero-head .h1 { font-size: 16px; font-weight: 600; color: #e8eef6; letter-spacing: .02em; }
 .hero-head .upd { font-size: 13px; color: #7e8b9c; margin-left: auto; }
 .hero-head .upd b { color: #aab6c5; }
+/* 引流主 CTA：进 /app 完整工具（真实导航链接，样式与广告位明显区分，防 AdSense 误点判定） */
+.hero-head-r { margin-left: auto; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.hero-head-r .upd { margin-left: 0; }
+.cta-app {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 14px; border-radius: 8px;
+  background: linear-gradient(135deg, #f0b64a, #e0872c); color: #1c1408;
+  font-size: 13px; font-weight: 700; letter-spacing: .02em; text-decoration: none;
+  box-shadow: 0 2px 10px rgba(240, 182, 74, .28); white-space: nowrap;
+}
+.cta-app:hover { filter: brightness(1.08); text-decoration: none; }
 .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
 .tab {
   border: 1px solid var(--dark-line); background: var(--dark-card);

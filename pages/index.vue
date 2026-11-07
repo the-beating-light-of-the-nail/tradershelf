@@ -5,13 +5,17 @@
       <div class="wrap">
         <div class="hero-head">
           <h1>大盘云图 · A股全景热力图</h1>
-          <span class="upd">{{ tradeDate }} 收盘快照<span v-if="stale.length">（部分数据延迟）</span> · <NuxtLink to="/xingtu">换成星图看 →</NuxtLink></span>
+          <div class="hero-head-r">
+            <span class="upd">{{ tradeDate }} 收盘快照<span v-if="stale.length">（部分数据延迟）</span> · <NuxtLink to="/xingtu">换成星图看 →</NuxtLink></span>
+            <a class="cta-app" href="/app?market=a&from=%2F" title="进入实时完整版看盘工具（本站 /app）">⚡ 实时完整版看盘 →</a>
+          </div>
         </div>
         <MarketTabs />
         <HeatMap
           :groups="aGroups()"
           palette="cn"
           market-key="a"
+          app-link="/app?market=a&from=%2F"
           live-fs="m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048"
           :count-label="`沪深全A · ${total} 只（按流通市值前 ${topN} 只展示）`"
           :aria-label="'A股大盘云图热力图'"

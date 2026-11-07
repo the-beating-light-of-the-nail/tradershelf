@@ -20,4 +20,8 @@ not_found_handling = "none"
 # 目录式路由（/crypto、/xingtu）默认会 307 到带斜杠版本，白丢一跳；
 # 与 canonical / sitemap 的无斜杠形式对齐，统一去掉尾部斜杠
 html_handling = "drop-trailing-slash"
+# /app（移植的看盘工具 SPA 入口页）先进 worker 再回 assets：
+# 命中即直出的 assets 层无法加响应头，worker 里统一注入 X-Robots-Tag: noindex（HTML 内另有 meta 双保险）。
+# 只拦 /app 精确入口，/app/assets/* 静态资源仍直出，不加跳。
+run_worker_first = ["/app"]
 # /api/* 等非资产路径落到 worker；静态路径优先直出资产

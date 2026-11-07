@@ -36,6 +36,9 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       crawlLinks: true,
+      // /app 是移植的 React 看盘工具 SPA（merge-app.mjs 拷入 .output/public/app），
+      // 不是 Nuxt 路由：预渲染爬虫不要跟进页面里的 /app CTA 深链（否则撞 [slug] 兜底报 fatal）
+      ignore: ['/app'],
       routes: [
         '/',
         '/us', '/hk', '/crypto',
