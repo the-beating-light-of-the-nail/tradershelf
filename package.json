@@ -14,6 +14,7 @@
     "deploy:demo": "npx wrangler deploy -c wrangler.demo.toml"
   },
   "dependencies": {
+    "echarts": "^6.1.0",
     "nuxt": "^3.17.0"
   }
 }
