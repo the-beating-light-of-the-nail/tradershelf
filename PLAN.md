@@ -165,9 +165,9 @@ tradershelf/
 
 **竞品对标结论**（52etf.site / dapan.app / stock.wenyaoyefei.com 实测抓取）：三家热力图全部是**纯 JS 画布、HTML 源码里零股票文本**（dapan.app 首屏仅"热力图加载中..."，stock.wenyaoyefei 连标题都是英文），52etf 有 FAQ+复盘时间轴但同样无 SSR 个股层——**SSR 文本层 + 归档矩阵是全赛道唯一**；功能层差距（缩放钻取/截图分享/自选股/雪球跳转）属 Phase 3+。
 
-**⚠ P0 待决——同名仓库双项目冲突**：GitHub `the-beating-light-of-the-nail/tradershelf`（2026-11-06 12:02 另一会话创建）装着**另一个项目**：英文纯静态计算器站（仓位/risk-reward 工具，14 文件），其 wrangler.toml 同样 `name="tradershelf"` + 挂 tradershelf.com。该站从未部署（workers 部署史最早为本项目 16:28 首部署，无覆盖事故），但**两边谁后 deploy 谁覆盖生产 worker**。候选：A. 本项目为正主，收编两个计算器进 `/tools/`（public/ 直通零改造），旧仓改名让位；B. 静态站为正主，本项目换名/域；C. 静态站拆去 tool.tradershelf.com。**倾向 A**（金融工具按既定决策应住主域子目录，且计算器本就在 Phase 3 规划内）。
+**⚠ P0 同名仓库双项目冲突——已处置（2026-11-07，按候选 A）**：GitHub `the-beating-light-of-the-nail/tradershelf` 曾装着另一项目（英文纯静态计算器站，仓位/risk-reward 工具，2026-11-06 11:55 单提交 53e669f，从未部署）。处置：该提交备份至 **`legacy/calculator-site` 分支**（本地+远程，零丢失）→ 本项目 main（14+ 提交，含 Phase 3）`--force-with-lease` 正主上位。**遗留动作（Phase 4）**：从备份分支收编两个计算器进 `/tools/`（纯静态，public/ 直通零改造），然后可视情况删除备份分支。
 
-**待办**：① 仓库冲突拍板；② 配 Secrets（`CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`）激活收盘管线；③ 本机 git 传输全挂（SSL_ERROR_SYSCALL，代理亦挂、API 通），恢复后需将本地全史对齐远端（远端 2 提交是另一项目，处置依赖 ①）。
+**待办**：① ~~仓库冲突拍板~~ ✅ 2026-11-07 已按候选 A 处置（见上）；② 配 Secrets（`CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`）激活收盘管线——**注意**：main 强推后需确认 Actions workflow 触发正常；③ ~~本机 git 传输全挂~~ ✅ 已恢复（2026-11-07 clone/push 通畅）。**新增 ④**：两会话并行操作同仓库/同 worker（2026-11-07 09:50 出现互相交错提交与部署），后续同仓库工作需错峰或先 `git pull --rebase`。
 
 ### Phase 3 进度明细（2026-11-07 立，工具层完整移植；当日实施）
 
