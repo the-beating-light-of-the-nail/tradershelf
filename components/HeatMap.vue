@@ -259,7 +259,11 @@ onMounted(() => {
   }
   measure()
   RO = new ResizeObserver(measure)
-  RO.observe(el)
+  const stageNode = resolveStage()
+  if (stageNode) {
+    RO.observe(stageNode)
+    observedNode = stageNode
+  }
   // webview 兜底：RO 在部分内嵌浏览器不可靠，多重触发保证首个非零布局一定被捕获
   window.addEventListener('resize', measure)
   document.addEventListener('visibilitychange', measure)

@@ -169,16 +169,26 @@ tradershelf/
 
 **待办**：① 仓库冲突拍板；② 配 Secrets（`CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`）激活收盘管线；③ 本机 git 传输全挂（SSL_ERROR_SYSCALL，代理亦挂、API 通），恢复后需将本地全史对齐远端（远端 2 提交是另一项目，处置依赖 ①）。
 
-### Phase 3 进度明细（2026-11-07 立，工具层完整移植）
+### Phase 3 进度明细（2026-11-07 立，工具层完整移植；当日实施）
 
 | # | 事项 | 状态 | 说明 |
 |---|---|---|---|
-| 1 | vendor stock-market-cloud → `app/` | ⬜ | clone 上游 → 去掉 `.git` 落进 `app/`（保留其源码结构不动）；`THIRD_PARTY_NOTICES.md` 补 MIT 版权声明 |
-| 2 | 构建改造（最小侵入） | ⬜ | vite `base: '/app'`；品牌替换：Logo/标题/页脚文案 → Trader Shelf（红金终端风可保留）；`VITE_USE_MARKET_BACKEND` 指向 `/api/market`；改动集中在配置与常量文件，**不碰其组件逻辑**，方便跟随上游更新 |
-| 3 | Worker `/api/market` | ⬜ | 移植其 Node 行情后端语义：腾讯批量行情 + KV 缓存（盘中 TTL 10–30s，收盘态降频）；universe 管理——⚠️ Workers 免费版单请求 50 子请求上限，**港股 00001–09999 全量扫描不能在一次请求内做**：改为构建时生成静态 universe 清单入 KV + cron 定时增量校验；美股 Nasdaq Trader 目录文件同理 |
-| 4 | 部署管线合并 | ⬜ | `npm run deploy` 追加 `app` 构建（`vite build`）→ 产物拷入 `.output/public/app/`；worker 对 `/app/*` 下发 `X-Robots-Tag: noindex`；GitHub Actions 同步改造 |
-| 5 | SEO 页引流衔接 | ⬜ | 市场/板块/归档页主 CTA + 板块 tile 点击深链 `/app?market=…&focus=…`；`/app` 顶栏回链；导航/页脚加「实时完整版」入口 |
-| 6 | 验收 | ⬜ | 对标 stock.wenyaoyefei.com 逐功能实测（三市场/10s 刷新/下钻/搜索/详情/PE/双语/倒计时）；大陆直连 + 代理两种网络实测 `/api/market` 与浏览器直连降级；Lighthouse；收录抽查（SEO 页无退化） |
+| 1 | vendor stock-market-cloud → `app/` | ✅ | clone 上游去 `.git` 落进 `app/`（含 backend/ tests/ 保留）；删 CNAME/robots/sitemap（指向上游域名）；`THIRD_PARTY_NOTICES.md` 已建（MIT 全文 + 改造清单） |
+| 2 | 构建改造（最小侵入） | ✅ | vite `base:'/app'`；品牌三处（index.html 标题/meta/去上游 canonical+OG+umami 统计脚本、HeaderBar 徽标 chip、locales）；前端默认同源 `/api/market` **零配置改动**；本地 build 通过（gzip 204KB） |
+| 3 | Worker `/api/market` | ✅ | 忠实移植 market-server.mjs：腾讯批量行情（400/批并行、GBK 解码、46 字段解析、异常过滤、去重排序）+ 确定性 PE/成交量合成 + 契约逐字段一致；**universe 用内置池静态化**（`scripts/gen-market-universe.mjs` → `data/market-universe.json`：US 505 / HK 500 / CN 5445 全A），Cache API 边缘缓存 15s（同 crypto 模式，零新增资源）。实测：HK/CN 实时数据正确，CN 5445 只冷取 1.9s、缓存命中 0.13s；`/api/health` 就绪 |
+| 4 | 部署管线合并 | ✅ | `npm run deploy` = fetch → `build:app`(vite) → generate → `merge-app.mjs`(dist→.output/public/app) → wrangler deploy → indexnow；nitro 爬虫 `ignore:['/app']`（否则 CTA 深链撞 [slug] 兜底 fatal）；**`run_worker_first=["/app"]`**（assets 层命中即直出不进 worker，noindex 头必须先进 worker 注入；`/app/assets/*` 仍直出不加跳）；HTML 另有 meta robots 双保险 |
+| 5 | SEO 页引流衔接 | ✅ | 市场/首页 hero 主 CTA「⚡ 实时完整版看盘 →」（琥珀按钮，`.cta-app`，与广告位区分）；ECharts 预览**板块 tile 点击 → `/app?market=a&focus=板块名`**（appLink prop，us/crypto 保留本页下钻）；/app 深链参数：`market`(a/hk/hktech+scope 透传)、`focus`(行业名自动开面板，一次性消费)、`from`(HeaderBar「← 返回云图」回链，仅站内相对路径)；相关页卡片 +1 |
+| 6 | 验收 | ✅ | 2026-11-07 线上全过（见下） |
+
+**实施中发现（上游实情，非 bug）**：上游 App 实为 **A股中心**——实时刷新仅 fetch CN（8s）+ 中文指数条；港股 HK_ALL/HK_TECH 用**内置静态池 + taxonomy**（不实时）；美股 tab 在隐藏锚点 `data-active={false}`（后端 api.ts 有 US 能力但 App 未接）。故 /app 体验 = 作者线上站同款：A 股 5445 只实时 + 港股静态视图 + 无美股主视图。README「三市场」为宣传口径。`/api/market?type=US` worker 已支持，若后续要美股实时可改 App 接线（Phase 4 候选）。
+
+### Phase 3 验收记录（2026-11-07，本地 wrangler dev + 生产实测）
+
+- **线上核心链路**：`/app` 200 + `X-Robots-Tag: noindex`；`/app/assets/*` 直出 200；`/api/market?type=CN` 生产实时（建设银行 11.91 +2.14%）；`/api/crypto` 200 无回归；未知路径 404 保持；首页 CTA `⚡ 实时完整版看盘 →` 深链 `/app?market=a&from=%2F` 在产物 HTML。
+- **/app 浏览器实测**（生产 + 本地）：品牌「📈 大盘云图 + Trader Shelf」徽标、7 条实时指数条、scope 侧栏（A股全图/沪深300/…/港股大盘/恒生科技带加权涨跌）、canvas 1282×806 渲染、「← 返回云图」回链（from 参数）均正常；深链 `?market=hk&focus=行业名` 一次性消费后自动清参。
+- **性能**：CN 5445 只（14 批并行）冷取 1.9s，边缘缓存命中 0.13s；SPA 主包 gzip 204KB。
+- **⚠ 事故与修复（验收抓出）**：工作区未提交的 `HeatMap.vue` 存在 `RO.observe(el)` 未定义变量笔误（非 Phase 3 引入，昨晚上线后即在）——SSR 正常但**客户端水合即抛 ReferenceError，整页替换为 Nuxt 500 错误页**，curl 型验收完全测不到，浏览器验收抓出。已修复（`resolveStage()` 判空后 observe）并重新部署，生产复核无 `Internal Server Error`、496 tiles 挂载。**教训入流程：改 HeatMap/交互层后必须浏览器级回归，curl 只能验 SSR 层。**
+- git 传输已恢复（本日 clone/push 通畅），Phase 2 遗留待办 ③ 中「传输全挂」过期作废。
 
 **Phase 3 关键决策已定**：不重写只移植（保功能保手感）；同域子目录 `/app` 而非子域（内链权重不出域、assets 合并部署零改造）；`/app` noindex（canvas 无文本，不耗抓取预算）；现有 ECharts HeatMap 降级为 SEO 页预览不删除。
 

@@ -241,7 +241,7 @@ export function App() {
     const hit = allStocks.find(
       s => s.sector === kw || s.subsector === kw || (s.subsector && s.subsector.includes(kw)) || (s.sector && s.sector.includes(kw))
     );
-    if (hit) {
+    if (hit && hit.subsector) {
       focusConsumedRef.current = true;
       handleSubsectorClick(hit.sector, hit.subsector);
       // 用后即清，避免刷新/分享时重复弹面板
