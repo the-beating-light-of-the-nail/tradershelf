@@ -139,18 +139,38 @@ function buildOption() {
 
 async function initChart() {
   if (!chartEl.value) return
+  const W = window as any
   try {
-    const [{ init, use }, { TreemapChart }, { TooltipComponent }, { CanvasRenderer }] = await Promise.all([
+    // 坑：容器在 display:none 时 init 会拿到 0×0 → 空画布。
+    // 先翻 chartReady 让容器可见，等一帧拿到真实尺寸后再 init。
+    chartReady.value = true
+    await nextTick()
+    await new Promise((r) => requestAnimationFrame(() => r(null)))
+    W.__tsChartStep = 'importing'
+    const [{ init, use }, charts, comps, renders] = await Promise.all([
       import('echarts/core'),
-      import('echarts/charts').then((m) => m.TreemapChart),
-      import('echarts/components').then((m) => m.TooltipComponent),
-      import('echarts/renderers').then((m) => m.CanvasRenderer),
-    ] as any)
-    use([TreemapChart, TooltipComponent, CanvasRenderer])
+      import('echarts/charts'),
+      import('echarts/components'),
+      import('echarts/renderers'),
+    ])
+    W.__tsChartStep = 'use'
+    use([charts.TreemapChart, comps.TooltipComponent, renders.CanvasRenderer])
+    W.__tsChartStep = 'chartEl=' + (chartEl.value ? 'ok' : 'null')
+    if (!chartEl.value || chartEl.value.clientWidth === 0) {
+      W.__tsChartErr = 'guard: width=' + (chartEl.value ? chartEl.value.clientWidth : 'null')
+      chartReady.value = false
+      return
+    }
+    W.__tsChartStep = 'init'
     chart = init(chartEl.value)
     chart.setOption(buildOption())
-    chartReady.value = true
-  } catch { /* 图表加载失败 → 保留 SSR tiles，功能不降级 */ }
+    requestAnimationFrame(() => chart?.resize())
+    W.__tsChartStep = 'ready'
+  } catch (e) {
+    W.__tsChartErr = String((e as any)?.message || e)
+    // 图表加载失败 → 保留 SSR tiles，功能不降级
+    chartReady.value = false
+  }
 }
 
 function updateChart() {
