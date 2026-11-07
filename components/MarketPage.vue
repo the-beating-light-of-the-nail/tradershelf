@@ -44,6 +44,7 @@
           :size-label="m.sizeLabel"
           :aria-label="m.h1"
           :foot="m.foot"
+          :ccy="m.ccy || 'cny'"
         />
       </div>
     </section>

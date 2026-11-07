@@ -338,3 +338,73 @@ table.data tbody tr:last-child td { border-bottom: 0; }
 
 /* ECharts 交互层提示文案（toolbar 内） */
 .tm-hint { font-size: 12px; color: #5d6a7d; }
+
+/* ============================================================
+   个股详情面板（点击热力图色块弹出；对标 dapan.app 式右栏详情）
+   ============================================================ */
+.stk-panel {
+  position: fixed; right: 0; top: 0; bottom: 0; z-index: 120;
+  width: min(460px, 46vw);
+  background: #0d1118; border-left: 1px solid #1f2836;
+  display: flex; flex-direction: column;
+  box-shadow: -18px 0 46px rgba(0, 0, 0, .45);
+  color: #e8eef6;
+}
+.stk-head {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 14px 10px; border-bottom: 1px solid #1a2230;
+}
+.stk-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.stk-name { font-weight: 700; font-size: 17px; white-space: nowrap; }
+.stk-code { color: #66717f; font-size: 12.5px; }
+.stk-spark { width: 64px; height: 22px; flex: none; }
+.stk-quote { display: flex; align-items: baseline; gap: 10px; margin-left: auto; }
+.stk-price { font-size: 17px; font-weight: 700; }
+.stk-pct { font-size: 14px; font-weight: 700; }
+.stk-cap { font-size: 12px; }
+.stk-close {
+  border: 1px solid #1f2836; background: #141a24; color: #aab6c5;
+  border-radius: 8px; width: 28px; height: 28px; cursor: pointer; flex: none; font-size: 13px;
+}
+.stk-close:hover { color: #fff; }
+.stk-kline { padding: 8px 8px 4px; }
+.stk-kbox { height: 216px; width: 100%; }
+.stk-kmsg { color: #66717f; padding: 22px 12px; text-align: center; }
+.stk-ma { display: flex; align-items: center; color: #aab6c5; padding: 2px 6px 6px; font-size: 11px; }
+.stk-sectorbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 7px 14px; background: #10161f; border-top: 1px solid #1a2230;
+  font-size: 12.5px; color: #aab6c5;
+}
+.stk-sector-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stk-tabs { display: flex; gap: 2px; padding: 6px 10px 0; border-top: 1px solid #1a2230; }
+.stk-tabs button {
+  border: 0; background: transparent; color: #7e8b9c; font-size: 12.5px;
+  padding: 6px 12px; cursor: pointer; border-bottom: 2px solid transparent; border-radius: 0;
+}
+.stk-tabs button.on { color: #fff; border-bottom-color: var(--gold); font-weight: 600; }
+.stk-list { list-style: none; margin: 0; padding: 4px 0 14px; overflow-y: auto; flex: 1; }
+.stk-list li {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 14px; font-size: 13px; cursor: pointer;
+}
+.stk-list li:hover { background: #141b27; }
+.stk-list li.cur { background: #182234; box-shadow: inset 2px 0 0 var(--gold); }
+.stk-list .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stk-list .p { width: 64px; text-align: right; }
+.stk-list .c { width: 66px; text-align: right; font-weight: 600; }
+
+/* 面板滑入动画 */
+.stk-slide-enter-active, .stk-slide-leave-active { transition: transform .22s ease, opacity .22s ease; }
+.stk-slide-enter-from, .stk-slide-leave-to { transform: translateX(30px); opacity: 0; }
+
+@media (max-width: 1020px) {
+  .stk-panel {
+    top: auto; left: 0; width: 100%; height: 72vh;
+    border-left: 0; border-top: 1px solid #1f2836;
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -18px 46px rgba(0, 0, 0, .5);
+  }
+  .stk-slide-enter-from, .stk-slide-leave-to { transform: translateY(40px); }
+  .stk-kbox { height: 180px; }
+}

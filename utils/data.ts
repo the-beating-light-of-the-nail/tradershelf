@@ -17,6 +17,7 @@ export interface Stock {
   fmcap: number
   ind?: string
   cname?: string
+  mkt?: number // 东财市场号：1=沪 0=深 116=港股 105/106/107=美股（日K secid 用）
 }
 export interface SectorSnap {
   slug: string
@@ -76,6 +77,17 @@ export const fp = (p: number) => (typeof p === 'number' && isFinite(p) ? (p > 0 
 export const clsCN = (p: number) => (p > 0 ? 'pos-cn' : p < 0 ? 'neg-cn' : 'muted')
 /** 美股/Crypto 文本色 class（绿涨红跌） */
 export const clsIntl = (p: number) => (p > 0 ? 'pos-intl' : p < 0 ? 'neg-intl' : 'muted')
+
+/** 东财日K secid：优先用快照里的市场号，缺失时按代码规则推断（A股前缀/港股5位） */
+export function secidOf(s: { code: string; mkt?: number }): string | null {
+  const c = String(s.code || '')
+  if (typeof s.mkt === 'number') return s.mkt + '.' + c
+  if (!c) return null
+  if (/^(6|9)/.test(c)) return '1.' + c          // 沪主板/B股
+  if (/^(0|2|3|4|8)/.test(c)) return '0.' + c    // 深主板/创业板/北交
+  if (/^\d{5}$/.test(c)) return '116.' + c       // 港股
+  return null                                    // 美股字母代码无市场号时不可推
+}
 
 /* ---------- treemap 分组 ---------- */
 /** A股全景：全量 top 600 按东财行业分组，每组按流通市值取前 14 */

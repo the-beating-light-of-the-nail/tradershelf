@@ -13,8 +13,8 @@
     </div>
 
     <div ref="stage" class="tm-stage" :aria-label="ariaLabel || '大盘热力图'">
-      <!-- SEO 层：SSR 个股 tiles（爬虫可读文本层），ECharts 就绪后让位给 Canvas，数据同源 -->
-      <div v-show="!chartReady" style="position:absolute;inset:0">
+    <!-- SEO 层：SSR 个股 tiles（爬虫可读文本层），ECharts 就绪后让位给 Canvas，数据同源 -->
+    <div v-show="!chartReady" style="position:absolute;inset:0">
         <div
           v-for="t in tiles" :key="t.key" class="tm-cell"
           :style="{ left: t.l + '%', top: t.t + '%', width: t.w + '%', height: t.h + '%', backgroundColor: t.color, fontSize: t.sm ? '12px' : undefined }"
@@ -25,8 +25,15 @@
         </div>
         <div v-for="g in groupLabels" :key="'g' + g.key" class="tm-group-label" :style="{ left: g.l + '%', top: g.t + '%' }">{{ g.name }}</div>
       </div>
-      <div v-show="chartReady" ref="chartEl" style="position:absolute;inset:0" />
+      <!-- 图表容器常驻 DOM：未就绪时 pointer-events:none 不挡 tiles，首个非零布局时 init -->
+      <div ref="chartEl" :style="chartReady ? 'position:absolute;inset:0' : 'position:absolute;inset:0;pointer-events:none'" />
     </div>
+
+    <!-- 个股详情面板：点击色块弹出（日K + 同板块成分列表） -->
+    <StockPanel
+      :stock="picked" :peers="pickedPeers" :palette="palette" :ccy="ccy"
+      @close="picked = null" @pick="onPanelPick"
+    />
 
     <p v-if="foot" class="hero-foot">{{ foot }}</p>
   </div>
@@ -49,9 +56,21 @@ const props = withDefaults(
     sizeLabel?: string
     foot?: string
     ariaLabel?: string
+    ccy?: 'cny' | 'usd' | 'hkd'
   }>(),
-  { palette: 'cn', marketKey: '', liveFs: null, liveUrl: null, liveInterval: 60000, sizeLabel: '面积 = 流通市值' },
+  { palette: 'cn', marketKey: '', liveFs: null, liveUrl: null, liveInterval: 60000, sizeLabel: '面积 = 流通市值', ccy: 'cny' },
 )
+
+/* ---------- 个股详情面板状态 ---------- */
+const picked = ref<Stock | null>(null)
+const pickedPeers = ref<Group | null>(null)
+function openPanel(code: string) {
+  for (const g of groups.value) {
+    const s = g.stocks.find((x) => x.code === code)
+    if (s) { picked.value = s; pickedPeers.value = g; return }
+  }
+}
+function onPanelPick(s: Stock) { picked.value = s }
 
 /* ---------- 分组数据（可被 JSONP / JSON 轮询实时合并更新） ---------- */
 const groups = ref<Group[]>([])
@@ -116,7 +135,7 @@ function buildOption() {
         type: 'treemap',
         left: 0, right: 0, top: 0, bottom: 0,
         roam: true,
-        nodeClick: 'zoomToNode',
+        nodeClick: false, // 手动接管：板块节点=下钻，个股节点=详情面板
         leafDepth: multi.value ? 2 : undefined,
         breadcrumb: multi.value
           ? { show: true, bottom: 4, height: 22, itemStyle: { color: '#141a24', borderColor: '#1f2836', textStyle: { color: '#aab6c5', fontSize: 11 } } }
@@ -137,34 +156,51 @@ function buildOption() {
   }
 }
 
+/* echarts 模块预热（等待首帧布局期间并行加载，消除初始化空窗） */
+let echartsWarm: Promise<any[]> | null = null
+function warmEcharts() {
+  echartsWarm ||= Promise.all([
+    import('echarts/core'),
+    import('echarts/charts'),
+    import('echarts/components'),
+    import('echarts/renderers'),
+  ])
+  return echartsWarm
+}
+
+/* 只在首个非零布局时调用（见 onMounted.measure），彻底规避 0 尺寸 init 与后台页签竞态 */
 async function initChart() {
-  if (!chartEl.value) return
   const W = window as any
   try {
-    // 坑：容器在 display:none 时 init 会拿到 0×0 → 空画布。
-    // 先翻 chartReady 让容器可见，等一帧拿到真实尺寸后再 init。
-    chartReady.value = true
-    await nextTick()
-    await new Promise((r) => requestAnimationFrame(() => r(null)))
-    W.__tsChartStep = 'importing'
-    const [{ init, use }, charts, comps, renders] = await Promise.all([
-      import('echarts/core'),
-      import('echarts/charts'),
-      import('echarts/components'),
-      import('echarts/renderers'),
-    ])
+    W.__tsChartStep = 'await-imports'
+    const [{ init, use }, charts, comps, renders] = await warmEcharts()
     W.__tsChartStep = 'use'
     use([charts.TreemapChart, comps.TooltipComponent, renders.CanvasRenderer])
-    W.__tsChartStep = 'chartEl=' + (chartEl.value ? 'ok' : 'null')
-    if (!chartEl.value || chartEl.value.clientWidth === 0) {
-      W.__tsChartErr = 'guard: width=' + (chartEl.value ? chartEl.value.clientWidth : 'null')
-      chartReady.value = false
-      return
+    // chartEl 同样自愈：ref 失联时从舞台第 2 个子节点找回
+    let cel: HTMLElement | null = chartEl.value && (chartEl.value as any).isConnected ? chartEl.value : null
+    if (!cel) {
+      const st = resolveStage()
+      cel = st ? (st.querySelector('div[ref], div:nth-child(2)') as HTMLElement) : null
+      // 兜底：建一个新容器（极端情况节点全丢）
+      if (!cel && st) { cel = document.createElement('div'); cel.style.cssText = 'position:absolute;inset:0'; st.appendChild(cel) }
+      if (cel) chartEl.value = cel as any
     }
-    W.__tsChartStep = 'init'
-    chart = init(chartEl.value)
+    if (!cel) { W.__tsChartErr = 'no chartEl'; return }
+    // 等容器非零（最多 10×250ms）
+    for (let i = 0; i < 10 && cel.clientWidth === 0; i++) await new Promise((r) => setTimeout(r, 250))
+    W.__tsChartStep = 'init@' + cel.clientWidth
+    chart = init(cel)
     chart.setOption(buildOption())
-    requestAnimationFrame(() => chart?.resize())
+    chartReady.value = true
+    // 点击接管：板块 → 下钻（面包屑返回）；个股 → 详情面板
+    chart.on('click', (p: any) => {
+      const d = p.data || {}
+      if (d.children && d.children.length) {
+        chart.dispatchAction({ type: 'treemapZoomToNode', seriesIndex: 0, name: p.name })
+      } else if (d.code) {
+        openPanel(d.code)
+      }
+    })
     W.__tsChartStep = 'ready'
   } catch (e) {
     W.__tsChartErr = String((e as any)?.message || e)
@@ -188,20 +224,46 @@ function shot() {
   a.click()
 }
 
-/* ---------- 挂载：测量 → 图表 → 实时通道 ---------- */
+/* ---------- 挂载：首个非零布局 → init 图表；布局变化 → resize ---------- */
+let RO: ResizeObserver | null = null
+let inited = false
+let observedNode: HTMLElement | null = null
+/** 解析当前舞台节点：ref 优先，失联（null/游离）时 querySelector 自愈 */
+function resolveStage(): HTMLElement | null {
+  const r = stage.value
+  if (r && r.isConnected) return r
+  const live = document.querySelector('.tm-stage')
+  if (live) { stage.value = live as any; return live }
+  return r && !r.isConnected ? live : r
+}
 onMounted(() => {
-  const el = stage.value
-  if (!el) return
   const measure = () => {
+    const el = resolveStage()
+    const W = window as any
+    W.__tsM = (W.__tsM || '') + '|' + (el ? (el.isConnected ? el.clientWidth + 'x' + el.clientHeight : 'disc!') : 'nullref')
+    if (!el || !el.isConnected) return
+    if (RO && observedNode !== el) { RO.disconnect(); RO.observe(el); observedNode = el }
     const w = el.clientWidth, h = el.clientHeight
-    if (w > 0 && h > 0) size.value = { w, h }
-    chart?.resize()
+    if (w > 0 && h > 0) {
+      size.value = { w, h }
+      if (!inited) { inited = true; initChart() }
+      else chart?.resize()
+    }
   }
   measure()
-  const ro = new ResizeObserver(measure)
-  ro.observe(el)
-  onBeforeUnmount(() => { ro.disconnect(); chart?.dispose() })
-  initChart()
+  RO = new ResizeObserver(measure)
+  RO.observe(el)
+  // webview 兜底：RO 在部分内嵌浏览器不可靠，多重触发保证首个非零布局一定被捕获
+  window.addEventListener('resize', measure)
+  document.addEventListener('visibilitychange', measure)
+  const t1 = setTimeout(measure, 300), t2 = setTimeout(measure, 1200), t3 = setTimeout(measure, 3000)
+  onBeforeUnmount(() => {
+    RO?.disconnect(); chart?.dispose()
+    window.removeEventListener('resize', measure)
+    document.removeEventListener('visibilitychange', measure)
+    clearTimeout(t1); clearTimeout(t2); clearTimeout(t3)
+  })
+  warmEcharts()
   startLive()
 })
 

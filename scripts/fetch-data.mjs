@@ -45,7 +45,7 @@ async function clistAll(fs, fields, fid = 'f12', maxPages = 80) {
 }
 
 const fmt = {
-  stock: (x) => ({ code: x.f12, name: x.f14, price: x.f2, pct: x.f3, amount: x.f6 || 0, mcap: x.f20 || 0, fmcap: x.f21 || 0, ind: x.f100 || '' }),
+  stock: (x) => ({ code: x.f12, name: x.f14, price: x.f2, pct: x.f3, amount: x.f6 || 0, mcap: x.f20 || 0, fmcap: x.f21 || 0, ind: x.f100 || '', mkt: x.f13 }),
 }
 
 async function main() {
@@ -62,7 +62,7 @@ async function main() {
 
   // ---------- 2) A股全量（涨跌家数 + 全景 treemap 用前 600） ----------
   try {
-    const raw = await clistAll('m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048', 'f2,f3,f6,f12,f14,f20,f21,f100', 'f21', 70)
+    const raw = await clistAll('m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048', 'f2,f3,f6,f12,f13,f14,f20,f21,f100', 'f21', 70)
     const stocks = raw.map(fmt.stock).filter((s) => typeof s.pct === 'number' && s.fmcap > 0)
     const up = stocks.filter((s) => s.pct > 0).length
     const down = stocks.filter((s) => s.pct < 0).length
@@ -99,7 +99,7 @@ async function main() {
     try {
       const b = boards.find((x) => x.name === cfg.name) || boards.find((x) => x.name.startsWith(cfg.name) && x.up + x.down >= 25)
       if (!b) { console.error('[warn] 板块未匹配:', cfg.name); continue }
-      const raw = await clistAll(`b:${b.bk}`, 'f2,f3,f6,f12,f14,f20,f21', 'f21', 4)
+      const raw = await clistAll(`b:${b.bk}`, 'f2,f3,f6,f12,f13,f14,f20,f21', 'f21', 4)
       const stocks = raw.map(fmt.stock).filter((s) => typeof s.pct === 'number' && s.fmcap > 0)
       const up = stocks.filter((s) => s.pct > 0).length
       snap.sectors.push({
@@ -113,11 +113,11 @@ async function main() {
 
   // ---------- 5) 美股 / 港股（市值前 80，东财带中文名） ----------
   try {
-    const raw = await clistAll('m:105,m:106,m:107', 'f2,f3,f6,f12,f14,f20,f21', 'f20', 2)
+    const raw = await clistAll('m:105,m:106,m:107', 'f2,f3,f6,f12,f13,f14,f20,f21', 'f20', 2)
     snap.us = raw.map(fmt.stock).filter((s) => typeof s.pct === 'number' && s.mcap > 0).slice(0, 80)
   } catch (e) { meta.stale.push('us'); console.error('[warn] 美股抓取失败:', e.message) }
   try {
-    const raw = await clistAll('m:116', 'f2,f3,f6,f12,f14,f20,f21', 'f20', 3)
+    const raw = await clistAll('m:116', 'f2,f3,f6,f12,f13,f14,f20,f21', 'f20', 3)
     snap.hk = raw.map(fmt.stock)
       .filter((s) => typeof s.pct === 'number' && s.mcap > 0 && !/^[89]/.test(s.code) && !/-R$/.test(s.name)) // 剔除人民币柜台
       .slice(0, 60)

@@ -9,8 +9,10 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "data": "node scripts/fetch-data.mjs",
+    "universe": "node scripts/gen-market-universe.mjs",
+    "build:app": "npm --prefix app run build",
     "indexnow": "node scripts/indexnow.mjs",
-    "deploy": "node scripts/fetch-data.mjs && nuxt generate && npx wrangler deploy && node scripts/indexnow.mjs",
+    "deploy": "node scripts/fetch-data.mjs && npm run build:app && nuxt generate && node scripts/merge-app.mjs && npx wrangler deploy && node scripts/indexnow.mjs",
     "deploy:demo": "npx wrangler deploy -c wrangler.demo.toml"
   },
   "dependencies": {

@@ -5,6 +5,7 @@
 > 初期目标：月 $20（中文财经 AdSense RPM 约 $1.5–4，需月 5,000–13,000 PV ≈ 日均 170–450 PV）。
 > 线上：**https://tradershelf.com**（Nuxt 3 SSG，47 路由，东财真数据）· 演示母版 https://demo.tradershelf.com
 > 日常更新：`npm run deploy`（抓数据 → generate → wrangler 部署，一条命令）。
+> **2026-11-07 战略调整：完整移植 stock-market-cloud 工具层到本站 `/app`（React 原样 vendor，不重写），SEO 页转型为引流入口——页面内强 CTA 点击即进完整工具界面，流量不出 tradershelf.com。详见 §1②、§7 Phase 3。**
 
 ---
 
@@ -22,23 +23,26 @@
   3. 工作区标准链路（本地 build + `wrangler deploy` 直传 Cloudflare，与 git 解耦）已跑顺 15+ 个站，tradershelf.com 沿用即可。
 - GitHub 的正确角色：**存代码的仓库**（public，README 带站点链接，顺手当一条外链资产）。
 
-### ② 示例 HTML 怎么结合？——拆三层拿，不要整页搬
+### ② 开源项目怎么用？——工具层**完整移植** + SEO 壳自建（2026-11-07 战略调整，替代原「拆三层拿」）
 
-| 层 | 从开源项目拿什么 | 说明 |
-|---|---|---|
-| **数据层**（最有价值） | 行情接口 URL、参数、字段映射、降级逻辑 | a-share-heatmap 用东财全市场快照 + 腾讯批量行情兜底；stock-market-cloud 用腾讯接口 + 本地缓存。参数都是踩过坑的，照抄省最多时间 |
-| **布局/渲染层** | treemap 排布算法 + 配色映射 + 悬浮交互 | stock-market-cloud 用 d3-hierarchy squarify，模块可直接抽出来用；或 ECharts treemap 薄封装。两者都省掉了"从零写 treemap" |
-| **页面外壳层** | ❌ 全部扔掉 | 它们的 Title/Meta/DOM 一个字不进生产页——这是判重重灾区，也是我们要做信息增量的地方 |
+> 原策略作废原因：上线实测证明 ECharts 薄封装复刻不出竞品的工具体验（D3 手感、1500 只股票池、搜索/详情/PE 维度差一个量级），工具弱会拖累整站信任与回访。新策略：**把 stock-market-cloud 完整移植到本站 `/app`，SEO 页负责搜索流量并诱导点击进入完整工具**——工具体验直接拉平到开源默认态上限，SSR 文本层仍是独家护城河。
 
-⚠️ 竞争认知：两个开源项目作者自己的线上站（dapan.app、stock.wenyaoyefei.com）就是"开源默认态"的上限样本——工具功能别跟他们拼，**我们拼的是他们没有的：SSG 文本增量 + 长尾页矩阵 + 每日归档**。
+| 层 | 做法 |
+|---|---|
+| **工具层** | stock-market-cloud **整体原样移植**：React 18 + Vite + d3-hierarchy vendor 进 `app/`，只改三处——base 路径 `/app`、品牌换 Trader Shelf、数据源指向自家 `/api/market`。**不重写成 Vue**（重写必丢功能与手感） |
+| **数据层** | 它的本地 Node 后端（腾讯行情 + 磁盘缓存 + universe 扫描）移植为 Worker `/api/market`（KV 换磁盘）；保留其自带的「后端不可用→浏览器直连」降级路径 |
+| **SEO 壳层** | 自建（现有 Nuxt SSG 页全保留）：市场/板块/归档页继续吃搜索流量，页内**强 CTA + 带参深链**把用户送进 `/app` 完整工具，流量不出域 |
 
-### ③ 热力图需要重复开发吗？
+⚠️ 竞争认知（更新）：dapan.app、stock.wenyaoyefei.com 的工具体验我们**照搬拉平、不再回避**；独家优势 = SSR 文本层 + 长尾页矩阵 + 每日归档（三家竞品全是纯 JS 画布、零可收录文本，实测 2026-11-06）。
 
-**渲染不用重写，数据和壳才是开发量。**
+### ③ 工具还需要自己开发吗？
 
-- 两个项目都是 **MIT license（2026-11-06 已核实）**，可以合法直接搬代码模块，只需在 `THIRD_PARTY_NOTICES.md` 保留版权声明。
-- 热力图本质 = treemap（面积=市值）+ 红绿配色（颜色=涨跌幅）+ 标签/悬浮，stock-market-cloud 已支持 A股/港股/美股三市场切换、10 秒刷新、中英双语，**美股港股不需要"重复开发"，调它就行**。
-- 真正要自己开发的：① 数据管线（接口、缓存、降级、收盘静态化）；② 市场适配（美股/港股/Crypto 页**颜色翻转：绿涨红跌**，见 `demo/us.html`；交易时段状态；数字格式）；③ SEO 外壳（自动文案、表格、长尾页矩阵）——这是护城河，也是工作量所在。
+**不需要。完整移植，开发量收敛到三件事：数据后端、部署合并、引流衔接。**
+
+- stock-market-cloud 是 **MIT license（2026-11-06 已核实）**，vendor 进 `app/`，`THIRD_PARTY_NOTICES.md` 保留版权声明即可合法商用。
+- 它已自带、白拿的：A股/港股/美股三市场切换、10 秒刷新+环形倒计时、板块下钻、**市盈率/涨跌幅双染色**、市值加权板块标题、搜索直达、个股详情侧栏+Sparkline、中英双语。
+- 自己开发的只剩：① Worker `/api/market`（替代其 Node 后端）；② 部署管线合并（vite build 产物进 `/app`）；③ SEO 页 → `/app` 引流衔接（CTA/深链/品牌/回链闭环）。
+- 现有 ECharts 版 `HeatMap.vue` **保留不删**，降级为 SEO 页首屏预览（SSR 文本层是收录命脉），完整交互全部去 `/app`。
 
 ---
 
@@ -48,38 +52,41 @@
 - 部署：SSG 产物 → `wrangler deploy`（Workers 静态直传 + 自定义域；workers.dev 大陆被墙，一律自定义域）。
 - 搜索引擎：主攻 **Bing + Google**（无备案不指望百度）。**IndexNow 是归档页秒收录的主杠杆**，每次部署后推送新增 URL。
 
-## 3. 技术架构（Nuxt 3 SSG）
+## 3. 技术架构（双引擎：Nuxt 3 SSG【SEO 层】 + React SPA【工具层】，同域同 Worker）
 
-选型理由：与工作区 9+ 个站同栈，维护心智成本最低；nitro 产出纯静态；后续 i18n、工具页扩展顺手。（Astro 备选：仅当页面量 >5k、构建速度成瓶颈时再考虑。）
+`tradershelf.com` 根路径 = Nuxt SSG（搜索流量入口，保持全站 SSR 文本层）；`/app` = 完整移植的 stock-market-cloud（看盘工具，吃转化不吃搜索）；`/api/*` = Worker 统一数据层。
 
 ```
 tradershelf/
-  data/                 # 收盘管线产出的行情快照 JSON
+  app/                  # 【工具层·新增】stock-market-cloud 原样 vendor（React 18 + Vite + D3）
+                        #   仅改：vite base='/app'、品牌换 Trader Shelf、VITE_USE_MARKET_BACKEND→'/api/market'
+  data/                 # 收盘管线产出的行情快照 JSON（SEO 层用）
   scripts/
-    fetch-quotes.mjs    # 拉行情 → data/*.json（东财主源，新浪/腾讯降级）
-    gen-pages.mjs       # 快照 → 长尾页数据（复盘文案、表格行、涨跌家数）
-  pages/                # 门户 / 市场 / 板块 / 归档 / 工具 模板
-  components/           # HeatmapCanvas(treemap 封装) / QuoteTable / AdSlot / FaqBlock
-  worker/               # /api/quote 盘中代理（东财/CoinGecko，KV 缓存 30–60s）
+    fetch-data.mjs      # 拉行情 → data/*.json（东财主源，多级降级）
+    indexnow.mjs        # IndexNow 推送
+  pages/                # 【SEO 层】门户 / 市场 / 板块 / 归档 / 工具 模板（全部加 → /app 引流 CTA）
+  components/           # HeatMap(ECharts·降级为首屏预览) / MarketTabs / StockPanel / AdSlot / FaqBlock
+  worker/               # /api/crypto（已有）+ /api/market（新增：腾讯批量行情 + KV 缓存 + universe 管理）
   public/               # sitemap 分片 / og 图（脚本生成 1200×630）/ robots
 ```
 
-**数据双通道：**
+**数据三通道：**
 
-- 盘中：页面 JS → 自家 Worker `/api/quote`（边缘 KV 缓存 30–60s；隐藏上游接口细节 + 解决 CoinGecko 大陆可达性）→ 东财 / CoinGecko。
-- 收盘后：GitHub Actions cron（每交易日 16:10 北京时间）→ fetch 当日全量 → 生成复盘文案 + 归档页 + 板块页数据 → 构建 → `wrangler deploy`（凭据走 secret）→ IndexNow 推送新 URL。**归档页生成后永不重建，纯累积。**
+- **工具层（/app）**：SPA → Worker `/api/market`（KV 缓存盘中 TTL 10–30s，隐藏上游）→ 腾讯批量行情；股票池 universe（美股 Nasdaq Trader 目录 / 港股号段扫描，上限 ~1500 只）由 cron 定时重建存 KV；**Worker 不可用时 SPA 自动回落浏览器直连腾讯**（上游原生降级逻辑，白拿）。
+- **SEO 层（SSG 页）**：构建时东财快照打底 + 盘中 ECharts JSONP 15s 轻刷新（现状保留，预览定位）。
+- **收盘管线**：GitHub Actions cron（每交易日 16:10 北京时间）→ fetch 当日全量 → 复盘文案 + 归档页 → 构建（`nuxt generate` + `vite build` 合并）→ `wrangler deploy` → IndexNow。**归档页生成后永不重建，纯累积。**
 
-| 市场 | 主源 | 降级 |
+| 市场 | 工具层源（stock-market-cloud 方案） | SEO 层源 |
 |---|---|---|
-| A股 | 东方财富 clist（a-share-heatmap 已验证的参数） | 新浪 hq、腾讯 qt.gtimg |
-| 美股/港股 | 东财国际接口（stock-market-cloud 三市场方案） | Yahoo quote |
-| Crypto | CoinGecko free（经 Worker 代理） | 币安公开 ticker |
+| A股/港股/美股 | 腾讯 qt 批量行情（经 `/api/market`，KV 缓存） | 东财 clist（快照 + JSONP 轻刷新） |
+| Crypto | 工具暂无 crypto（Phase 4 评估并入第 4 市场） | CoinGecko → CoinLore → CoinCap（`/api/crypto`） |
 
 ## 4. 页面矩阵（SEO 核心，首批 ~35 页）
 
 | URL | Title（示例） | 模板 | 优先级 | 目标词群（Bing 数据） |
 |---|---|---|---|---|
 | `/` | 大盘云图_股票热力图_美股港股Crypto行情云图 - Trader Shelf | 门户 | P0 | 大盘云图 41k / stock heat map |
+| `/app` | 完整实时看盘工具（三市场热力图/搜索/个股详情/PE 切换/双语） | React SPA·移植 | P0 | **noindex 不进 sitemap**，吃转化不吃搜索；承接全部 SEO 页 CTA |
 | `/a/` | A股大盘云图_沪深两市实时热力图 | 市场 | P0 | a股热力图 / 板块图 |
 | `/us/` | 美股大盘云图_标普500纳斯达克100实时热力图 | 市场（配色翻转） | P0 | 美股大盘云图 216+99 |
 | `/hk/` | 港股大盘云图_恒生指数科技股实时热力图 | 市场 | P0 | 港股大盘云图 |
@@ -94,7 +101,7 @@ tradershelf/
 | `/about` `/privacy` `/disclaimer` `/contact` | 关于 / 隐私政策 / 免责声明 / 联系 | 站点 ×4 | P1 | AdSense 审核硬要求 |
 | `/en/` | Crypto & Stock Heatmap - Real-time Market Map | 英文版 | P2 | 英文高 RPM（stock heat map 3.4k） |
 
-**内链规则**（防孤儿页 + 权重流动）：每页 ≥8 条内链 = 面包屑 + 市场Tab + 相关板块 3–5 + 当日归档 + 上级入口 + 页脚矩阵。板块页互链相关板块（半导体↔算力↔CPO），归档页链「今日 / 前一天 / 后一天」。
+**内链规则**（防孤儿页 + 权重流动）：每页 ≥8 条内链 = 面包屑 + 市场Tab + 相关板块 3–5 + 当日归档 + 上级入口 + 页脚矩阵。板块页互链相关板块（半导体↔算力↔CPO），归档页链「今日 / 前一天 / 后一天」。**→ `/app` 的链接一律带参深链**（`/app?market=us&focus=<板块>` 直达对应市场/下钻态）；`/app` 自身 noindex（`X-Robots-Tag`，由 worker 统一下发），把抓取预算留给 SEO 页。
 
 ## 5. 单页 SEO 模板规范（demo 已可视化）
 
@@ -104,6 +111,11 @@ tradershelf/
   > `{日期}{市场}大盘云图复盘：全市场上涨{X}家、下跌{Y}家，成交{额}。领涨板块为{Top1}（+{pct}%），领跌为{Bottom1}。主力资金净流入前三个股……云图按流通市值排布，颜色代表当日涨跌幅。`
 - 结构化数据：门户 = WebSite；市场/板块/归档页 = BreadcrumbList + FAQPage；工具页后期 + SoftwareApplication。
 - 技术件：sitemap 分片（≤5k URL/片）、robots、canonical 全站自指、OG/Twitter 卡、每模板 1 张 1200×630 OG 图（脚本生成）。
+- **引流衔接（SEO 页 → `/app` 完整工具，2026-11-07 新增）**：
+  - 每张市场/板块页首屏（热力图预览上方或紧邻处）放主 CTA「实时完整版 →」：真实 `<a>` 导航，样式与广告位明显区分、保持 ≥60px 距离（防 AdSense 误点判定，§6）；
+  - 板块页 CTA 深链 `/app?market=a&focus=<板块>`，进入即下钻到该板块；归档页 CTA →「看今日实时全景」；
+  - 首屏 ECharts 预览保留只读态的悬停/下钻钩子：**点击任意板块 tile 直接跳 `/app` 对应深链**（预览即诱饵）；
+  - `/app` 顶栏带「← 返回 {市场}云图」回链 + 品牌统一 Trader Shelf，形成 SEO↔工具闭环，流量不出域。
 
 ## 6. 广告与变现
 
@@ -124,8 +136,9 @@ tradershelf/
 |---|---|---|
 | **Phase 0 ✅** | 本规划 + `demo/` 三页设计演示；在演示上确认/修改方向、加内容 | 方向拍板 |
 | **Phase 1 ✅** | Nuxt 骨架 + A股热力图真数据（盘中 Worker 代理）+ P0 6 页 + P1 前 12 页 + sitemap/robots + 上线 tradershelf.com | 20+ 页可访问，Bing Webmaster / GSC 就绪 |
-| **Phase 2（进行中）** | 美股/港股/Crypto（配色翻转+时段状态）+ 收盘归档管线（Actions cron）+ IndexNow + AdSense 前置 4 页 | 归档页逐日累积并被收录；提交 AdSense |
-| **Phase 3** | 计算器矩阵、EN 版、浏览器插件（角标显上证/BTC，点击回主站） | 日 PV 200+ |
+| **Phase 2 ✅** | 美股/港股/Crypto（配色翻转+时段状态）+ 收盘归档管线（Actions cron）+ IndexNow + AdSense 前置 4 页 | 归档页逐日累积并被收录；提交 AdSense（验收记录见下） |
+| **Phase 3（当前，2026-11-07 起）** | **战略转向：完整移植 stock-market-cloud 到 `/app`**——vendor → base=/app + 品牌替换 → Worker `/api/market` → 部署管线合并 → SEO 页 CTA/深链引流 | 线上 `/app` 三市场全功能可用（10s 刷新/板块下钻/搜索直达/个股详情/PE 切换/中英双语），对标 stock.wenyaoyefei.com 逐功能不缺项；SEO 页 CTA 全覆盖且点击落地即对应市场/板块；收录与判重不受影响 |
+| **Phase 4** | 计算器矩阵、EN 版、浏览器插件（角标显上证/BTC，点击回主站）、crypto 并入工具第 4 市场 | 日 PV 200+ |
 
 ### Phase 2 进度明细（2026-11-06）
 
@@ -156,9 +169,24 @@ tradershelf/
 
 **待办**：① 仓库冲突拍板；② 配 Secrets（`CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`）激活收盘管线；③ 本机 git 传输全挂（SSL_ERROR_SYSCALL，代理亦挂、API 通），恢复后需将本地全史对齐远端（远端 2 提交是另一项目，处置依赖 ①）。
 
+### Phase 3 进度明细（2026-11-07 立，工具层完整移植）
+
+| # | 事项 | 状态 | 说明 |
+|---|---|---|---|
+| 1 | vendor stock-market-cloud → `app/` | ⬜ | clone 上游 → 去掉 `.git` 落进 `app/`（保留其源码结构不动）；`THIRD_PARTY_NOTICES.md` 补 MIT 版权声明 |
+| 2 | 构建改造（最小侵入） | ⬜ | vite `base: '/app'`；品牌替换：Logo/标题/页脚文案 → Trader Shelf（红金终端风可保留）；`VITE_USE_MARKET_BACKEND` 指向 `/api/market`；改动集中在配置与常量文件，**不碰其组件逻辑**，方便跟随上游更新 |
+| 3 | Worker `/api/market` | ⬜ | 移植其 Node 行情后端语义：腾讯批量行情 + KV 缓存（盘中 TTL 10–30s，收盘态降频）；universe 管理——⚠️ Workers 免费版单请求 50 子请求上限，**港股 00001–09999 全量扫描不能在一次请求内做**：改为构建时生成静态 universe 清单入 KV + cron 定时增量校验；美股 Nasdaq Trader 目录文件同理 |
+| 4 | 部署管线合并 | ⬜ | `npm run deploy` 追加 `app` 构建（`vite build`）→ 产物拷入 `.output/public/app/`；worker 对 `/app/*` 下发 `X-Robots-Tag: noindex`；GitHub Actions 同步改造 |
+| 5 | SEO 页引流衔接 | ⬜ | 市场/板块/归档页主 CTA + 板块 tile 点击深链 `/app?market=…&focus=…`；`/app` 顶栏回链；导航/页脚加「实时完整版」入口 |
+| 6 | 验收 | ⬜ | 对标 stock.wenyaoyefei.com 逐功能实测（三市场/10s 刷新/下钻/搜索/详情/PE/双语/倒计时）；大陆直连 + 代理两种网络实测 `/api/market` 与浏览器直连降级；Lighthouse；收录抽查（SEO 页无退化） |
+
+**Phase 3 关键决策已定**：不重写只移植（保功能保手感）；同域子目录 `/app` 而非子域（内链权重不出域、assets 合并部署零改造）；`/app` noindex（canvas 无文本，不耗抓取预算）；现有 ECharts HeatMap 降级为 SEO 页预览不删除。
+
 ## 8. 风险与合规
 
-- **License**：两个参考项目均 MIT（2026-11-06 核实：stock-market-cloud、a-share-heatmap）。搬代码须在 `THIRD_PARTY_NOTICES.md` 保留原版权声明。
+- **License**：两个参考项目均 MIT（2026-11-06 核实：stock-market-cloud、a-share-heatmap）。搬代码须在 `THIRD_PARTY_NOTICES.md` 保留原版权声明；`app/` 整体 vendor 后声明必须覆盖其全部源码树，且品牌替换（Logo/站名/文案）只做区分、不删版权信息。
+- **移植后的判重**：`/app` 是 canvas 工具无文本，与 stock.wenyaoyefei.com 不构成内容判重；SEO 文本层仍全站独家（2026-11-06 竞品实测已证三家零 SSR 文本）。
+- **Workers 限额**：免费版 50 子请求/次——universe 全量扫描必须走「构建时静态清单 + cron 分片」；`/api/market` 缓存 TTL 需平衡腾讯免费接口限频（上游超限时回落 KV 旧值并标注时间，不伪造）。
 - **接口反爬/字段变更**：多源降级 + 响应结构校验；失败时页面回落到最近静态快照并标注时间。
 - **商标**：星图页只用「对比/平替」说明性用法，页首注明「非东方财富官方」，不冒充。
 - **免责**：全站页脚固定免责声明；行情数据标注延迟与来源。
