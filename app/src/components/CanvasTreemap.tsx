@@ -93,7 +93,15 @@ export const CanvasTreemap = forwardRef<CanvasTreemapRef, CanvasTreemapProps>(({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
   const [hoveredStockItem, setHoveredStockItem] = useState<LayoutStockRect | null>(null);
-  const [hoveredSubsectorItem, setHoveredSubsectorItem] = useState<LayoutSubsectorRect | null>(null);
+
+  // Hover-animation plumbing: refs mirror state so the RAF loop can redraw
+  // the highlight overlay without re-rendering React at 30fps.
+  const hoveredStockItemRef = useRef<LayoutStockRect | null>(null);
+  const hoveredSubsectorItemRef = useRef<LayoutSubsectorRect | null>(null);
+  const externalHoverRef = useRef(externalHoveredSubsector);
+  const baseCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const skipFrameRef = useRef(false);
 
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0, initialTx: 0, initialTy: 0 });
@@ -233,31 +241,28 @@ export const CanvasTreemap = forwardRef<CanvasTreemapRef, CanvasTreemapProps>(({
     return { sectors, subsectors, stocks: layoutStocks };
   }, [searchQuery]);
 
-  // Update layout ref
-  useEffect(() => {
-    const layout = computeLayout(dimensions.width, dimensions.height, stocks);
-    layoutRectsRef.current = layout;
-    renderCanvas();
-  }, [dimensions, stocks, computeLayout]);
-
-  // Main Canvas Rendering Function
-  const renderCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
+  // Static treemap pre-rendered into an offscreen canvas (pan/zoom baked in).
+  // Hover animation then only composites this layer + a highlight overlay.
+  const renderBaseLayer = useCallback(() => {
     const { width, height } = dimensions;
     if (width <= 0 || height <= 0) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+    let base = baseCanvasRef.current;
+    if (!base) {
+      base = document.createElement('canvas');
+      baseCanvasRef.current = base;
     }
+    const dpr = window.devicePixelRatio || 1;
+    const devW = Math.max(1, Math.floor(width * dpr));
+    const devH = Math.max(1, Math.floor(height * dpr));
+    if (base.width !== devW || base.height !== devH) {
+      base.width = devW;
+      base.height = devH;
+    }
+    const ctx = base.getContext('2d');
+    if (!ctx) return;
 
-    ctx.save();
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // Clear background
     ctx.fillStyle = '#1e212b';
@@ -356,15 +361,45 @@ export const CanvasTreemap = forwardRef<CanvasTreemapRef, CanvasTreemapProps>(({
         ctx.restore();
       }
     }
+  }, [dimensions, transform]);
+
+  // Composite: blit the cached base layer, then draw hover highlights.
+  // `animTime` (ms) drives the pulsing glow; omit it for a static frame.
+  const drawCanvas = useCallback((animTime?: number) => {
+    const canvas = canvasRef.current;
+    const base = baseCanvasRef.current;
+    if (!canvas || !base) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const { width, height } = dimensions;
+    if (width <= 0 || height <= 0) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    if (canvas.width !== base.width || canvas.height !== base.height) {
+      canvas.width = base.width;
+      canvas.height = base.height;
+    }
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(base, 0, 0, width, height);
+
+    const { subsectors } = layoutRectsRef.current;
+
+    // Apply Pan & Zoom Transform for the highlight overlay
+    ctx.translate(transform.x, transform.y);
+    ctx.scale(transform.scale, transform.scale);
 
     // 4. Highlight Hovered Subsector (Bright Yellow Border - Exact 52etf.site Replica)
+    const externalHover = externalHoverRef.current;
     const activeSub =
-      hoveredSubsectorItem ||
-      (externalHoveredSubsector
+      hoveredSubsectorItemRef.current ||
+      (externalHover
         ? subsectors.find(
             s =>
-              s.sector === externalHoveredSubsector.sector &&
-              s.subsector === externalHoveredSubsector.subsector
+              s.sector === externalHover.sector &&
+              s.subsector === externalHover.subsector
           )
         : null);
 
@@ -379,25 +414,79 @@ export const CanvasTreemap = forwardRef<CanvasTreemapRef, CanvasTreemapProps>(({
       );
     }
 
-    // 5. Highlight Hovered Tile
-    if (hoveredStockItem) {
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.lineWidth = 1.5 / transform.scale;
-      ctx.strokeRect(
-        hoveredStockItem.x,
-        hoveredStockItem.y,
-        hoveredStockItem.w,
-        hoveredStockItem.h
-      );
+    // 5. Animated Highlight on Hovered Tile (click affordance)
+    const hovered = hoveredStockItemRef.current;
+    if (hovered) {
+      // 0 → 1 breathing phase, ~1.25s period
+      const pulse = animTime !== undefined ? 0.5 + 0.5 * Math.sin(animTime * 0.005) : 1;
+
+      // Brighten the tile fill so it visibly reacts under the cursor
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.08 + 0.14 * pulse})`;
+      ctx.fillRect(hovered.x, hovered.y, hovered.w, hovered.h);
+
+      // Pulsing glow border: layered strokes render a halo at any DPR/zoom
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.10 + 0.16 * pulse})`;
+      ctx.lineWidth = 7 / transform.scale;
+      ctx.strokeRect(hovered.x, hovered.y, hovered.w, hovered.h);
+
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.30 + 0.30 * pulse})`;
+      ctx.lineWidth = 3.5 / transform.scale;
+      ctx.strokeRect(hovered.x, hovered.y, hovered.w, hovered.h);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.lineWidth = 1.8 / transform.scale;
+      ctx.strokeRect(hovered.x, hovered.y, hovered.w, hovered.h);
     }
+  }, [dimensions, transform]);
 
-    ctx.restore();
-  }, [dimensions, transform, hoveredStockItem, hoveredSubsectorItem, externalHoveredSubsector]);
-
-  // Re-render when transform or hovered item changes
+  // Keep a stable handle to the latest drawCanvas for the RAF loop
+  const drawCanvasRef = useRef(drawCanvas);
   useEffect(() => {
-    renderCanvas();
-  }, [renderCanvas]);
+    drawCanvasRef.current = drawCanvas;
+  }, [drawCanvas]);
+
+  // Tooltip-driven subsector highlight (mouse may be off-canvas): sync via ref
+  // and repaint one static frame, without touching the base layer.
+  useEffect(() => {
+    externalHoverRef.current = externalHoveredSubsector;
+    drawCanvasRef.current();
+  }, [externalHoveredSubsector]);
+
+  // RAF loop for the hover pulse — runs only while a tile is hovered,
+  // skipping alternate frames (~30fps) to stay cheap.
+  const ensureHoverAnim = useCallback(() => {
+    if (rafRef.current !== null) return;
+    const loop = (time: number) => {
+      rafRef.current = requestAnimationFrame(loop);
+      skipFrameRef.current = !skipFrameRef.current;
+      if (skipFrameRef.current) return;
+      drawCanvasRef.current(time);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+  }, []);
+
+  const stopHoverAnim = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    drawCanvasRef.current(); // settle to a static highlight frame
+  }, []);
+
+  // Cancel the animation loop on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  // Update layout ref, then redraw base layer + composite
+  useEffect(() => {
+    const layout = computeLayout(dimensions.width, dimensions.height, stocks);
+    layoutRectsRef.current = layout;
+    renderBaseLayer();
+    drawCanvas();
+  }, [dimensions, stocks, computeLayout, renderBaseLayer, drawCanvas]);
 
   // Wheel zoom centered on cursor
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
@@ -508,7 +597,17 @@ export const CanvasTreemap = forwardRef<CanvasTreemapRef, CanvasTreemapProps>(({
     }
 
     setHoveredStockItem(foundStock);
-    setHoveredSubsectorItem(foundSub);
+    hoveredStockItemRef.current = foundStock;
+    hoveredSubsectorItemRef.current = foundSub;
+
+    // Pulse the tile only while a stock is hovered; paint one frame
+    // immediately so the highlight snaps in before the next RAF tick.
+    if (foundStock) {
+      ensureHoverAnim();
+    } else {
+      stopHoverAnim();
+    }
+    drawCanvasRef.current();
 
     if (foundSub) {
       const subRectInContainer = {
@@ -609,8 +708,10 @@ export const CanvasTreemap = forwardRef<CanvasTreemapRef, CanvasTreemapProps>(({
 
   const handleMouseLeave = () => {
     isDraggingRef.current = false;
+    hoveredStockItemRef.current = null;
+    hoveredSubsectorItemRef.current = null;
+    stopHoverAnim();
     setHoveredStockItem(null);
-    setHoveredSubsectorItem(null);
     onStockHover?.(null, 0, 0);
   };
 
@@ -665,7 +766,7 @@ export const CanvasTreemap = forwardRef<CanvasTreemapRef, CanvasTreemapProps>(({
     >
       <canvas
         ref={canvasRef}
-        className="block w-full h-full cursor-grab active:cursor-grabbing"
+        className={`block w-full h-full ${hoveredStockItem ? 'cursor-pointer' : 'cursor-grab'} active:cursor-grabbing`}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
