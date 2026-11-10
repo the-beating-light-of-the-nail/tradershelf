@@ -7,7 +7,7 @@
           <h1>大盘云图 · A股全景热力图</h1>
           <div class="hero-head-r">
             <span class="upd">{{ tradeDate }} 收盘快照<span v-if="stale.length">（部分数据延迟）</span> · <NuxtLink to="/xingtu">换成星图看 →</NuxtLink></span>
-            <a class="cta-app" href="/app?market=a&from=%2F" title="进入实时完整版看盘工具（本站 /app）">⚡ 实时完整版看盘 →</a>
+            <a class="cta-app" href="/app?market=a&from=%2F" title="进入实时完整版看盘工具（本站 /app）">⚡ 实时完整版看盘 <span class="arr">→</span></a>
           </div>
         </div>
         <MarketTabs />

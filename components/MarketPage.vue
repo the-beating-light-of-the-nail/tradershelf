@@ -29,7 +29,7 @@
           <div class="h1">{{ m.h1 }}</div>
           <div class="hero-head-r">
             <span class="upd">{{ tradeDate }}{{ m.closeSuffix }}</span>
-            <a class="cta-app" :href="appHref" title="进入实时完整版看盘工具（本站 /app）">⚡ 实时完整版看盘 →</a>
+            <a class="cta-app" :href="appHref" title="进入实时完整版看盘工具（本站 /app）">⚡ 实时完整版看盘 <span class="arr">→</span></a>
           </div>
         </div>
         <MarketTabs />

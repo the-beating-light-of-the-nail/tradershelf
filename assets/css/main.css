@@ -135,13 +135,45 @@ p { margin: 0 0 12px; }
 .hero-head-r { margin-left: auto; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .hero-head-r .upd { margin-left: 0; }
 .cta-app {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 6px 14px; border-radius: 8px;
-  background: linear-gradient(135deg, #f0b64a, #e0872c); color: #1c1408;
-  font-size: 13px; font-weight: 700; letter-spacing: .02em; text-decoration: none;
-  box-shadow: 0 2px 10px rgba(240, 182, 74, .28); white-space: nowrap;
+  position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px 16px; border-radius: 9px;
+  background: linear-gradient(135deg, #f6c35c, #e0872c); color: #1c1408;
+  font-size: 13.5px; font-weight: 700; letter-spacing: .02em; text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(240, 182, 74, .28);
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+  animation: cta-breathe 3.4s ease-in-out infinite;
 }
-.cta-app:hover { filter: brightness(1.08); text-decoration: none; }
+/* 周期扫光：每轮呼吸末尾掠过一道高光，模拟「按钮在亮」的暗示 */
+.cta-app::before {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .55), transparent);
+  transform: skewX(-18deg); pointer-events: none;
+  animation: cta-shine 3.4s ease-in-out infinite;
+}
+.cta-app .arr { display: inline-block; transition: transform .18s ease; }
+.cta-app:hover {
+  animation: none;
+  filter: brightness(1.07); text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 22px rgba(240, 182, 74, .5);
+}
+.cta-app:hover .arr { transform: translateX(4px); }
+.cta-app:active { transform: translateY(0) scale(.98); }
+.cta-app:focus-visible { outline: 2px solid #ffd98a; outline-offset: 3px; }
+@keyframes cta-breathe {
+  0%, 100% { box-shadow: 0 2px 10px rgba(240, 182, 74, .28); }
+  50% { box-shadow: 0 3px 20px rgba(240, 182, 74, .55), 0 0 0 3px rgba(240, 182, 74, .1); }
+}
+@keyframes cta-shine {
+  0%, 55% { left: -60%; }
+  85%, 100% { left: 130%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-app, .cta-app::before { animation: none; }
+  .cta-app, .cta-app .arr { transition: none; }
+}
 .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
 .tab {
   border: 1px solid var(--dark-line); background: var(--dark-card);
